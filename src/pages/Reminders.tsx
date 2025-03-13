@@ -51,8 +51,8 @@ const Reminders = () => {
     },
   ];
   
-  // Group active reminders by timing
-  const today = activeReminders.filter(r => r.running || (!r.completed && !r.upcoming));
+  // Group active reminders by timing - fixed the filter condition
+  const today = activeReminders.filter(r => r.running);
   const upcoming = activeReminders.filter(r => r.upcoming);
   
   return (
