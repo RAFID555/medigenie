@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import PrescriptionScanner from "@/components/PrescriptionScanner";
 import ReminderCard from "@/components/ReminderCard";
+import NearestHospital from "@/components/NearestHospital";
+import RepresentativeHelp from "@/components/RepresentativeHelp";
 import { FileText, Bell, ShoppingBag, RefreshCw } from "lucide-react";
 
 const Index = () => {
@@ -53,7 +55,7 @@ const Index = () => {
               <div className="relative overflow-hidden glass-card p-6 md:p-8 mb-6">
                 <div className="relative z-10">
                   <h1 className="text-3xl md:text-4xl font-bold mb-2 bangla">
-                    আপনার ঔষধ, সহজ ভাষায়
+                    মেডিজিনি - আপনার ঔষধ, সহজ ভাষায়
                   </h1>
                   <p className="text-muted-foreground mb-4 max-w-md bangla">
                     ডাক্তারি প্রেসক্রিপশন সহজে বুঝুন, রিমাইন্ডার সেট করুন, এবং ঔষধ অর্ডার করুন।
@@ -103,6 +105,20 @@ const Index = () => {
                   <p className="text-muted-foreground bangla">কোন রিমাইন্ডার নেই</p>
                 </Card>
               )}
+            </section>
+            
+            <section className="mb-12">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold bangla">নিকটবর্তী হাসপাতাল খুঁজুন</h2>
+              </div>
+              <NearestHospital />
+            </section>
+            
+            <section className="mb-12">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold bangla">সিরিয়াল সহায়তা</h2>
+              </div>
+              <RepresentativeHelp />
             </section>
         
             <section>
