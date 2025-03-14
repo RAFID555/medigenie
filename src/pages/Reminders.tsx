@@ -1,13 +1,18 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ReminderCard from "@/components/ReminderCard";
 import { Plus, Clock, CheckCircle, Bell, Calendar } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { toast as sonnerToast } from "@/components/ui/sonner";
 
 const Reminders = () => {
+  const { toast } = useToast();
+  const [notificationsPermission, setNotificationsPermission] = useState<string | null>(null);
+  
   // Sample reminders data
   const activeReminders = [
     {
@@ -51,7 +56,108 @@ const Reminders = () => {
     },
   ];
   
-  // Group active reminders by timing - fixed the filter condition
+  // Check for notification permission on component mount
+  useEffect(() => {
+    if ("Notification" in window) {
+      setNotificationsPermission(Notification.permission);
+    }
+
+    // Simulate a running reminder notification for demonstration
+    const simulateReminderNotification = setTimeout(() => {
+      if (activeReminders.some(r => r.running)) {
+        // Initial notification
+        showMedicineNotification(activeReminders[0]);
+        
+        // Follow-up reminder after 10 minutes if not taken
+        setTimeout(() => {
+          showFollowUpNotification(activeReminders[0]);
+        }, 10000); // Using 10 seconds for demo instead of 10 minutes (600000ms)
+      }
+    }, 5000); // Show initial notification after 5 seconds for demo
+
+    return () => {
+      clearTimeout(simulateReminderNotification);
+    };
+  }, []);
+
+  // Function to request notification permission
+  const requestNotificationPermission = async () => {
+    if ("Notification" in window) {
+      try {
+        const permission = await Notification.requestPermission();
+        setNotificationsPermission(permission);
+        
+        if (permission === "granted") {
+          toast({
+            title: "নোটিফিকেশন সক্রিয় করা হয়েছে",
+            description: "আপনি এখন ঔষধ খাওয়ার রিমাইন্ডার পাবেন",
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            title: "নোটিফিকেশন অনুমতি দেওয়া হয়নি",
+            description: "আপনি রিমাইন্ডার নোটিফিকেশন পাবেন না",
+          });
+        }
+      } catch (error) {
+        console.error("Error requesting notification permission:", error);
+      }
+    }
+  };
+
+  // Function to show medicine notification
+  const showMedicineNotification = (reminder: any) => {
+    if ("Notification" in window && Notification.permission === "granted") {
+      // Web Notification
+      const notification = new Notification("ঔষধ খাওয়ার সময় হয়েছে", {
+        body: `${reminder.medicineName} - ${reminder.dosage} - ${reminder.time}`,
+        icon: "/favicon.ico"
+      });
+      
+      notification.onclick = () => {
+        window.focus();
+        notification.close();
+      };
+    }
+    
+    // Also show in-app notification using Sonner
+    sonnerToast("ঔষধ খাওয়ার সময় হয়েছে", {
+      description: `${reminder.medicineName} - ${reminder.dosage} - ${reminder.time}`,
+      action: {
+        label: "সম্পন্ন",
+        onClick: () => console.log("Reminder marked as complete")
+      },
+    });
+  };
+  
+  // Function to show follow-up notification if medicine not taken
+  const showFollowUpNotification = (reminder: any) => {
+    if ("Notification" in window && Notification.permission === "granted") {
+      // Web Notification with more urgent message
+      const notification = new Notification("⚠️ আপনি কি ঔষধ খেয়েছেন?", {
+        body: `${reminder.medicineName} খাওয়ার সময় ১০ মিনিট অতিক্রান্ত হয়েছে। অনুগ্রহ করে ঔষধ খেয়ে নিন।`,
+        icon: "/favicon.ico",
+        requireInteraction: true // Keep notification until user interacts with it
+      });
+      
+      notification.onclick = () => {
+        window.focus();
+        notification.close();
+      };
+    }
+    
+    // Also show in-app notification using Sonner, with persistent option
+    sonnerToast.warning("আপনি কি ঔষধ খেয়েছেন?", {
+      description: `${reminder.medicineName} খাওয়ার সময় ১০ মিনিট অতিক্রান্ত হয়েছে।`,
+      duration: 10000,
+      action: {
+        label: "সম্পন্ন করুন",
+        onClick: () => console.log("Follow-up reminder marked as complete")
+      },
+    });
+  };
+  
+  // Group active reminders by timing
   const today = activeReminders.filter(r => r.running);
   const upcoming = activeReminders.filter(r => r.upcoming);
   
@@ -63,10 +169,22 @@ const Reminders = () => {
             <h1 className="text-2xl font-bold bangla">ঔষধের রিমাইন্ডার</h1>
             <p className="text-muted-foreground bangla">আপনার সব ঔষধ খাওয়ার রিমাইন্ডার</p>
           </div>
-          <Button className="gap-2 whitespace-nowrap">
-            <Plus className="h-4 w-4" />
-            <span className="bangla">নতুন রিমাইন্ডার</span>
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            {notificationsPermission !== "granted" && (
+              <Button 
+                variant="outline" 
+                onClick={requestNotificationPermission} 
+                className="gap-2 whitespace-nowrap"
+              >
+                <Bell className="h-4 w-4" />
+                <span className="bangla">নোটিফিকেশন সক্রিয় করুন</span>
+              </Button>
+            )}
+            <Button className="gap-2 whitespace-nowrap">
+              <Plus className="h-4 w-4" />
+              <span className="bangla">নতুন রিমাইন্ডার</span>
+            </Button>
+          </div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
