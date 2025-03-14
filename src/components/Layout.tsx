@@ -1,11 +1,16 @@
 
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Home, FileText, Bell, ShoppingBag, Menu, X, Settings } from "lucide-react";
+import { Home, FileText, Bell, ShoppingBag, Menu, X, Settings, LogOut } from "lucide-react";
+import { useAuth } from "./AuthProvider";
+import { Button } from "./ui/button";
+import { toast } from "@/hooks/use-toast";
 
 export const Layout = ({ children }: { children: React.ReactNode }) => {
+  const { user, signOut } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -18,6 +23,23 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
     // Close mobile menu when route changes
     setIsMenuOpen(false);
   }, [location.pathname]);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "সফলভাবে লগ আউট হয়েছে",
+        description: "আপনি সফলভাবে লগ আউট করেছেন।",
+      });
+      navigate("/auth");
+    } catch (error) {
+      toast({
+        title: "লগ আউট ব্যর্থ হয়েছে",
+        description: "দুঃখিত, একটি ত্রুটি ঘটেছে।",
+        variant: "destructive",
+      });
+    }
+  };
 
   const navItems = [
     {
@@ -56,8 +78,8 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
             to="/" 
             className="flex items-center space-x-2 font-bold text-lg"
           >
-            <span className="bg-primary rounded-md p-1 text-primary-foreground">মেড</span>
-            <span>সিম্পলিফাই</span>
+            <span className="bg-primary rounded-md p-1 text-primary-foreground">মেডি</span>
+            <span>জিনি</span>
           </Link>
           <button
             className="block md:hidden p-2"
@@ -101,6 +123,17 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                 <span className="bangla">{item.label}</span>
               </Link>
             ))}
+            
+            {user && (
+              <Button 
+                variant="ghost" 
+                className="mt-auto justify-start gap-3 text-sm font-medium"
+                onClick={handleSignOut}
+              >
+                <LogOut className="h-5 w-5" />
+                <span className="bangla">লগ আউট</span>
+              </Button>
+            )}
           </nav>
         </aside>
         
