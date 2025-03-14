@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -85,7 +84,10 @@ const AuthPage = () => {
           description: "দয়া করে আপনার ইমেইলে ভেরিফিকেশন লিঙ্ক দেখুন।",
         });
         // Navigate to login tab after successful registration
-        document.querySelector('[data-state="inactive"][data-value="login"]')?.click();
+        const loginTab = document.querySelector('[data-state="inactive"][data-value="login"]') as HTMLElement;
+        if (loginTab) {
+          loginTab.click();
+        }
       }
     } catch (error: any) {
       toast({
