@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Home, FileText, Bell, ShoppingBag, Menu, X, Settings, LogOut } from "lucide-react";
+import { Home, FileText, Bell, ShoppingBag, Menu, X, Settings, LogOut, Activity, Info } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import { Button } from "./ui/button";
 import { toast } from "@/hooks/use-toast";
@@ -63,6 +62,16 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
       href: "/order",
     },
     {
+      label: "হেলথ ট্র্যাকার",
+      icon: <Activity className="h-5 w-5" />,
+      href: "/health-tracker",
+    },
+    {
+      label: "আমাদের সম্পর্কে",
+      icon: <Info className="h-5 w-5" />,
+      href: "/about-us",
+    },
+    {
       label: "সেটিংস",
       icon: <Settings className="h-5 w-5" />,
       href: "/settings",
@@ -71,7 +80,6 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="flex min-h-screen flex-col">
-      {/* Mobile header */}
       <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
           <Link 
@@ -92,7 +100,6 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
       </header>
       
       <div className="flex flex-1">
-        {/* Mobile navigation overlay */}
         {isMenuOpen && (
           <div 
             className="fixed inset-0 z-30 bg-background/80 backdrop-blur-sm md:hidden"
@@ -100,7 +107,6 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
           />
         )}
         
-        {/* Sidebar */}
         <aside
           className={cn(
             "fixed top-16 left-0 z-30 w-64 h-[calc(100vh-4rem)] border-r bg-background transition-transform duration-300 md:translate-x-0 md:sticky",
@@ -137,7 +143,6 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
           </nav>
         </aside>
         
-        {/* Main content */}
         <main className="flex-1 p-0 md:p-6">
           <div className={cn(
             "animate-fade-in",

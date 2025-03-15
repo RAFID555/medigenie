@@ -1,76 +1,41 @@
 
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./components/AuthProvider";
-import ProtectedRoute from "./components/ProtectedRoute";
-import Index from "./pages/Index";
-import Prescriptions from "./pages/Prescriptions";
-import Reminders from "./pages/Reminders";
-import Order from "./pages/Order";
-import Settings from "./pages/Settings";
-import NotFound from "./pages/NotFound";
-import AuthPage from "./pages/Auth";
+import { AuthProvider } from "@/components/AuthProvider";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
-const queryClient = new QueryClient();
+// Pages
+import Index from "@/pages/Index";
+import Auth from "@/pages/Auth";
+import NotFound from "@/pages/NotFound";
+import Prescriptions from "@/pages/Prescriptions";
+import Reminders from "@/pages/Reminders";
+import Settings from "@/pages/Settings";
+import Order from "@/pages/Order";
+import HealthTracker from "@/pages/HealthTracker";
+import AboutUs from "@/pages/AboutUs";
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AuthProvider>
+import "./App.css";
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+          <Route path="/prescriptions" element={<ProtectedRoute><Prescriptions /></ProtectedRoute>} />
+          <Route path="/reminders" element={<ProtectedRoute><Reminders /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+          <Route path="/order" element={<ProtectedRoute><Order /></ProtectedRoute>} />
+          <Route path="/health-tracker" element={<ProtectedRoute><HealthTracker /></ProtectedRoute>} />
+          <Route path="/about-us" element={<ProtectedRoute><AboutUs /></ProtectedRoute>} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
         <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/auth" element={<AuthPage />} />
-            <Route 
-              path="/" 
-              element={
-                <ProtectedRoute>
-                  <Index />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/prescriptions" 
-              element={
-                <ProtectedRoute>
-                  <Prescriptions />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/reminders" 
-              element={
-                <ProtectedRoute>
-                  <Reminders />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/order" 
-              element={
-                <ProtectedRoute>
-                  <Order />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/settings" 
-              element={
-                <ProtectedRoute>
-                  <Settings />
-                </ProtectedRoute>
-              } 
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+      </Router>
+    </AuthProvider>
+  );
+}
 
 export default App;
