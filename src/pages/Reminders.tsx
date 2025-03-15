@@ -4,13 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ReminderCard from "@/components/ReminderCard";
-import { Plus, Clock, CheckCircle, Bell, Calendar } from "lucide-react";
+import { Plus, Clock, CheckCircle, Bell, Calendar, PhoneCall } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { toast as sonnerToast } from "sonner";
 
 const Reminders = () => {
   const { toast } = useToast();
   const [notificationsPermission, setNotificationsPermission] = useState<string | null>(null);
+  const [missedDays, setMissedDays] = useState<{[key: string]: number}>({});
   
   const activeReminders = [
     {
@@ -69,8 +70,23 @@ const Reminders = () => {
       }
     }, 5000);
 
+    const checkMissedMedications = () => {
+      if (activeReminders.length > 0) {
+        const missedMed = {...missedDays};
+        missedMed[activeReminders[2].id] = (missedMed[activeReminders[2].id] || 0) + 1;
+        setMissedDays(missedMed);
+        
+        if (missedMed[activeReminders[2].id] >= 1) {
+          notifyEmergencyContact(activeReminders[2]);
+        }
+      }
+    };
+    
+    const missedCheck = setTimeout(checkMissedMedications, 15000);
+
     return () => {
       clearTimeout(simulateReminderNotification);
+      clearTimeout(missedCheck);
     };
   }, []);
 
@@ -144,13 +160,24 @@ const Reminders = () => {
     });
   };
   
+  const notifyEmergencyContact = (reminder: any) => {
+    sonnerToast.error("একদিন ধরে ঔষধ খাওয়া হয়নি!", {
+      description: `${reminder.medicineName} ঔষধটি গতকাল খাওয়া হয়নি। নিকটতম ব্যক্তিকে জানানো হচ্ছে।`,
+      duration: 0,
+      action: {
+        label: "কল করুন",
+        onClick: () => window.location.href = "tel:+8801712345678"
+      },
+    });
+  };
+  
   const today = activeReminders.filter(r => r.running);
   const upcoming = activeReminders.filter(r => r.upcoming);
   
   return (
     <Layout>
       <div className="page-container">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
           <div>
             <h1 className="text-2xl font-bold bangla">ঔষধের রিমাইন্ডার</h1>
             <p className="text-muted-foreground bangla">আপনার সব ঔষধ খাওয়ার রিমাইন্ডার</p>
@@ -172,6 +199,22 @@ const Reminders = () => {
             </Button>
           </div>
         </div>
+        
+        <Card className="p-3 bg-red-100 border-red-300 mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <PhoneCall className="h-5 w-5 text-red-600" />
+            <p className="font-medium bangla">জরুরী সাহায্য: ৯৯৯</p>
+          </div>
+          <Button 
+            variant="destructive" 
+            size="sm" 
+            className="gap-1" 
+            onClick={() => window.location.href = "tel:999"}
+          >
+            <PhoneCall className="h-3 w-3" />
+            <span className="bangla">কল করুন</span>
+          </Button>
+        </Card>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card className="p-4 text-center flex flex-col items-center justify-center aspect-video">

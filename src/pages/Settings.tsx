@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Bell,
   Clock,
@@ -49,27 +49,39 @@ const Settings = () => {
   
   const handleSave = () => {
     toast({
-      title: "সেটিংস আপডেট হয়েছে",
-      description: "আপনার সেটিংস সফলভাবে সংরক্ষণ করা হয়েছে।"
+      title: settings.language === "english" ? "Settings Updated" : "সেটিংস আপডেট হয়েছে",
+      description: settings.language === "english" ? "Your settings have been saved successfully." : "আপনার সেটিংস সফলভাবে সংরক্ষণ করা হয়েছে।"
     });
+  };
+  
+  const getLabel = (banglaText: string, englishText: string) => {
+    return settings.language === "english" ? englishText : banglaText;
   };
   
   return (
     <Layout>
       <div className="page-container max-w-4xl">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold bangla">সেটিংস</h1>
-          <p className="text-muted-foreground bangla">অ্যাপ্লিকেশন পছন্দসমূহ কাস্টমাইজ করুন</p>
+          <h1 className="text-2xl font-bold">
+            {getLabel("সেটিংস", "Settings")}
+          </h1>
+          <p className="text-muted-foreground">
+            {getLabel("অ্যাপ্লিকেশন পছন্দসমূহ কাস্টমাইজ করুন", "Customize application preferences")}
+          </p>
         </div>
         
         <div className="space-y-6">
           <Card className="p-6">
-            <h2 className="text-lg font-semibold mb-4 bangla">ব্যক্তিগত তথ্য</h2>
+            <h2 className="text-lg font-semibold mb-4">
+              {getLabel("ব্যক্তিগত তথ্য", "Personal Information")}
+            </h2>
             
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium bangla">নাম</label>
+                  <label className="text-sm font-medium">
+                    {getLabel("নাম", "Name")}
+                  </label>
                   <div className="relative">
                     <User className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input 
@@ -81,7 +93,9 @@ const Settings = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium bangla">ইমেইল</label>
+                  <label className="text-sm font-medium">
+                    {getLabel("ইমেইল", "Email")}
+                  </label>
                   <div className="relative">
                     <Mail className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input 
@@ -95,7 +109,9 @@ const Settings = () => {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium bangla">ফোন নম্বর</label>
+                  <label className="text-sm font-medium">
+                    {getLabel("ফোন নম্বর", "Phone Number")}
+                  </label>
                   <div className="relative">
                     <Phone className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input 
@@ -107,7 +123,9 @@ const Settings = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium bangla">ঠিকানা</label>
+                  <label className="text-sm font-medium">
+                    {getLabel("ঠিকানা", "Address")}
+                  </label>
                   <div className="relative">
                     <MapPin className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input 
@@ -122,15 +140,21 @@ const Settings = () => {
           </Card>
           
           <Card className="p-6">
-            <h2 className="text-lg font-semibold mb-4 bangla">ভাষা এবং রিজিওনাল</h2>
+            <h2 className="text-lg font-semibold mb-4">
+              {getLabel("ভাষা এবং রিজিওনাল", "Language and Regional")}
+            </h2>
             
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Languages className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="font-medium bangla">ভাষা</p>
-                    <p className="text-sm text-muted-foreground bangla">অ্যাপ্লিকেশনের ভাষা নির্বাচন করুন</p>
+                    <p className="font-medium">
+                      {getLabel("ভাষা", "Language")}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {getLabel("অ্যাপ্লিকেশনের ভাষা নির্বাচন করুন", "Select application language")}
+                    </p>
                   </div>
                 </div>
                 <select 
@@ -149,8 +173,12 @@ const Settings = () => {
                 <div className="flex items-center gap-3">
                   <Globe className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="font-medium bangla">আঞ্চলিক উচ্চারণ</p>
-                    <p className="text-sm text-muted-foreground bangla">আঞ্চলিক উচ্চারণ নির্বাচন করুন</p>
+                    <p className="font-medium">
+                      {getLabel("আঞ্চলিক উচ্চারণ", "Regional Accent")}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {getLabel("আঞ্চলিক উচ্চারণ নির্বাচন করুন", "Select regional accent")}
+                    </p>
                   </div>
                 </div>
                 <select 
@@ -169,16 +197,20 @@ const Settings = () => {
           </Card>
           
           <Card className="p-6">
-            <h2 className="text-lg font-semibold mb-4 bangla">নোটিফিকেশন এবং রিমাইন্ডার</h2>
+            <h2 className="text-lg font-semibold mb-4">
+              {getLabel("নোটিফিকেশন এবং রিমাইন্ডার", "Notifications and Reminders")}
+            </h2>
             
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Bell className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="font-medium bangla">নোটিফিকেশন</p>
-                    <p className="text-sm text-muted-foreground bangla">
-                      ঔষধ খাওয়ার রিমাইন্ডার নোটিফিকেশন
+                    <p className="font-medium">
+                      {getLabel("নোটিফিকেশন", "Notifications")}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {getLabel("ঔষধ খাওয়ার রিমাইন্ডার নোটিফিকেশন", "Medicine reminder notifications")}
                     </p>
                   </div>
                 </div>
@@ -194,9 +226,11 @@ const Settings = () => {
                 <div className="flex items-center gap-3">
                   <Clock className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="font-medium bangla">রিমাইন্ডার সাউন্ড</p>
-                    <p className="text-sm text-muted-foreground bangla">
-                      রিমাইন্ডারের জন্য শব্দ
+                    <p className="font-medium">
+                      {getLabel("রিমাইন্ডার সাউন্ড", "Reminder Sound")}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {getLabel("রিমাইন্ডারের জন্য শব্দ", "Sound for reminders")}
                     </p>
                   </div>
                 </div>
@@ -214,7 +248,9 @@ const Settings = () => {
               onClick={handleSave}
             >
               <Save className="h-4 w-4" />
-              <span className="bangla">সংরক্ষণ করুন</span>
+              <span>
+                {getLabel("সংরক্ষণ করুন", "Save")}
+              </span>
             </Button>
           </div>
         </div>
