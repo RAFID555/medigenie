@@ -2,7 +2,8 @@
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PhoneCall, Ambulance, Heart, User } from "lucide-react";
+import { PhoneCall, Ambulance, Heart, User, Map } from "lucide-react";
+import MedicalFacilityFinder from "@/components/MedicalFacilityFinder";
 
 const Emergency = () => {
   return (
@@ -13,6 +14,11 @@ const Emergency = () => {
           <p className="text-muted-foreground bangla">
             জরুরী অবস্থায় সাহায্য পেতে নিচের অপশনগুলো ব্যবহার করুন
           </p>
+        </div>
+        
+        {/* Map Component */}
+        <div className="mb-6">
+          <MedicalFacilityFinder />
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

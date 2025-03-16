@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import NearestHospital from "@/components/NearestHospital";
 import RepresentativeHelp from "@/components/RepresentativeHelp";
 import AppointmentPayment from "@/components/AppointmentPayment";
+import MedicalFacilityFinder from "@/components/MedicalFacilityFinder";
 import { PhoneCall } from "lucide-react";
 
 const Index = () => {
@@ -30,7 +31,8 @@ const Index = () => {
       <div className="page-container">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2 space-y-6">
-            <NearestHospital />
+            {/* Replace NearestHospital with MedicalFacilityFinder */}
+            <MedicalFacilityFinder />
             <AppointmentPayment />
           </div>
           
