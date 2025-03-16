@@ -1,19 +1,29 @@
 
-import React from "react";
 import Layout from "@/components/Layout";
-import HealthTrackerComponent from "@/components/HealthTracker";
+import HealthTracker from "@/components/HealthTracker";
+import { useState } from "react";
 
-const HealthTracker = () => {
+const HealthTrackerPage = () => {
+  const [language, setLanguage] = useState("bangla");
+  
   return (
     <Layout>
-      <div className="container mx-auto py-6">
-        <h1 className="text-3xl font-bold bangla mb-6">হেলথ ট্র্যাকার</h1>
-        <div className="max-w-3xl mx-auto">
-          <HealthTrackerComponent />
+      <div className="page-container max-w-4xl mx-auto">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold">
+            {language === "english" ? "Health Tracker" : "স্বাস্থ্য ট্র্যাকার"}
+          </h1>
+          <p className="text-muted-foreground">
+            {language === "english" 
+              ? "Monitor your daily health activities" 
+              : "আপনার দৈনিক স্বাস্থ্য কার্যক্রম পর্যবেক্ষণ করুন"}
+          </p>
         </div>
+        
+        <HealthTracker language={language} />
       </div>
     </Layout>
   );
 };
 
-export default HealthTracker;
+export default HealthTrackerPage;

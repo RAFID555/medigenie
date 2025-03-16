@@ -5,8 +5,6 @@ import { Card } from "@/components/ui/card";
 import NearestHospital from "@/components/NearestHospital";
 import RepresentativeHelp from "@/components/RepresentativeHelp";
 import AppointmentPayment from "@/components/AppointmentPayment";
-import AboutCompany from "@/components/AboutCompany";
-import HealthTracker from "@/components/HealthTracker";
 import { PhoneCall } from "lucide-react";
 
 const Index = () => {
@@ -38,8 +36,6 @@ const Index = () => {
           
           <div className="space-y-6">
             <RepresentativeHelp />
-            <HealthTracker />
-            <AboutCompany />
           </div>
         </div>
       </div>
