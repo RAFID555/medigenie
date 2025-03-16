@@ -1,7 +1,8 @@
 
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Place {
   name: string;
@@ -34,29 +35,54 @@ const GoogleMap = ({ places, userLocation, isLoading }: GoogleMapProps) => {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [map, setMap] = useState<any>(null);
   const [markers, setMarkers] = useState<any[]>([]);
+  const [apiKey, setApiKey] = useState<string | null>(null);
 
-  // Load Google Maps script
+  // Fetch API key
   useEffect(() => {
-    if (!window.google && !document.getElementById('google-maps-script')) {
-      window.initMap = () => {
-        setMapLoaded(true);
-      };
+    const fetchApiKey = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('proxy-google-maps', {
+          method: 'POST',
+          body: { getKey: true }
+        });
+        
+        if (error) throw error;
+        if (data?.key) {
+          setApiKey(data.key);
+          console.log("API key retrieved successfully");
+        } else {
+          console.error("No API key returned");
+        }
+      } catch (error) {
+        console.error("Error fetching API key:", error);
+      }
+    };
 
-      const script = document.createElement('script');
-      script.id = 'google-maps-script';
-      script.src = `https://maps.googleapis.com/maps/api/js?key=API_KEY&libraries=places&callback=initMap`;
-      script.async = true;
-      script.defer = true;
-      document.head.appendChild(script);
-    } else if (window.google) {
-      setMapLoaded(true);
+    fetchApiKey();
+  }, []);
+
+  // Load Google Maps script once we have the API key
+  useEffect(() => {
+    if (!apiKey || window.google || document.getElementById('google-maps-script')) {
+      return;
     }
+    
+    window.initMap = () => {
+      setMapLoaded(true);
+    };
+
+    const script = document.createElement('script');
+    script.id = 'google-maps-script';
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initMap`;
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
 
     return () => {
       // Clean up
       window.initMap = undefined;
     };
-  }, []);
+  }, [apiKey]);
 
   // Initialize map when script is loaded and we have user location
   useEffect(() => {
@@ -150,12 +176,12 @@ const GoogleMap = ({ places, userLocation, isLoading }: GoogleMapProps) => {
 
   return (
     <div className="relative w-full h-full min-h-[300px] rounded-lg overflow-hidden border">
-      {(isLoading || !mapLoaded) && (
+      {(isLoading || !mapLoaded || !apiKey) && (
         <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-10">
           <div className="flex flex-col items-center gap-2">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <p className="text-sm text-muted-foreground bangla">
-              {!mapLoaded ? 'লোড হচ্ছে...' : 'স্থান খুঁজছে...'}
+              {!apiKey ? 'API কী লোড হচ্ছে...' : !mapLoaded ? 'মানচিত্র লোড হচ্ছে...' : 'স্থান খুঁজছে...'}
             </p>
           </div>
         </div>
@@ -166,4 +192,3 @@ const GoogleMap = ({ places, userLocation, isLoading }: GoogleMapProps) => {
 };
 
 export default GoogleMap;
-

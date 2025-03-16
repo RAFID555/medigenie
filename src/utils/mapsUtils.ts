@@ -18,9 +18,18 @@ export const getNearbyPlaces = async (
     
     // We'll call this API from our edge function
     const response = await fetch(`/api/proxy-google-maps?url=${encodeURIComponent(url)}`);
+    
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+    }
+    
     const data = await response.json();
     
-    return data.results;
+    if (data.error) {
+      throw new Error(data.error);
+    }
+    
+    return data.results || [];
   } catch (error) {
     console.error("Error fetching nearby places:", error);
     throw error;
@@ -41,11 +50,26 @@ export const getDistanceMatrix = async (
     
     // We'll call this API from our edge function
     const response = await fetch(`/api/proxy-google-maps?url=${encodeURIComponent(url)}`);
+    
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+    }
+    
     const data = await response.json();
     
+    if (data.error) {
+      throw new Error(data.error);
+    }
+    
+    if (!data.rows || !data.rows[0] || !data.rows[0].elements || !data.rows[0].elements[0]) {
+      throw new Error("Invalid response format from Distance Matrix API");
+    }
+    
     return {
-      distance: data.rows[0].elements[0].distance.text,
-      duration: data.rows[0].elements[0].duration.text
+      distance: data.rows[0].elements[0].distance?.text || "Unknown distance",
+      duration: data.rows[0].elements[0].duration?.text || "Unknown time",
+      distanceValue: data.rows[0].elements[0].distance?.value || 0,
+      durationValue: data.rows[0].elements[0].duration?.value || 0
     };
   } catch (error) {
     console.error("Error fetching distance matrix:", error);

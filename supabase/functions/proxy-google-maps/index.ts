@@ -14,6 +14,22 @@ serve(async (req) => {
   }
 
   try {
+    // Check if this is a key request
+    if (req.method === 'POST') {
+      const { getKey } = await req.json();
+      
+      if (getKey) {
+        const apiKey = Deno.env.get('GOOGLE_MAPS_API_KEY');
+        return new Response(
+          JSON.stringify({ key: apiKey }),
+          { 
+            status: 200, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+    }
+    
     // Get the URL from the query parameters
     const url = new URL(req.url).searchParams.get('url');
     
