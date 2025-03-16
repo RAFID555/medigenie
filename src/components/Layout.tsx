@@ -1,7 +1,8 @@
+
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Home, FileText, Bell, ShoppingBag, Menu, X, Settings, LogOut, Activity, Info } from "lucide-react";
+import { Home, FileText, Bell, ShoppingBag, Menu, X, Settings, LogOut, Activity, Info, PhoneCall, Ambulance, Heart } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import { Button } from "./ui/button";
 import { toast } from "@/hooks/use-toast";
@@ -47,6 +48,12 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
       href: "/",
     },
     {
+      label: "জরুরী সাহায্য",
+      icon: <PhoneCall className="h-5 w-5" />,
+      href: "/emergency",
+      className: "bg-red-600 text-white hover:bg-red-700"
+    },
+    {
       label: "প্রেসক্রিপশন",
       icon: <FileText className="h-5 w-5" />,
       href: "/prescriptions",
@@ -67,14 +74,14 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
       href: "/health-tracker",
     },
     {
-      label: "আমাদের সম্পর্কে",
-      icon: <Info className="h-5 w-5" />,
-      href: "/about-us",
-    },
-    {
       label: "সেটিংস",
       icon: <Settings className="h-5 w-5" />,
       href: "/settings",
+    },
+    {
+      label: "আমাদের সম্পর্কে",
+      icon: <Info className="h-5 w-5" />,
+      href: "/about-us",
     }
   ];
 
@@ -120,9 +127,10 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                 to={item.href}
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all",
+                  item.className,
                   location.pathname === item.href
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:bg-muted"
+                    ? item.className || "bg-primary text-primary-foreground"
+                    : item.className || "hover:bg-muted"
                 )}
               >
                 {item.icon}
