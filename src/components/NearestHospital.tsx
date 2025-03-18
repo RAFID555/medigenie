@@ -1,10 +1,12 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import LocationFinder from "./hospital/LocationFinder";
 import HospitalList from "./hospital/HospitalList";
 import EmergencyActions from "./hospital/EmergencyActions";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // Simulated hospital data - in a real app, this would come from a database or API
 const DUMMY_HOSPITALS = [
@@ -71,11 +73,20 @@ const NearestHospital = () => {
   const [locationError, setLocationError] = useState<string | null>(null);
   const [nearbyHospitals, setNearbyHospitals] = useState<Hospital[]>([]);
   const [emergencyDialogOpen, setEmergencyDialogOpen] = useState<boolean>(false);
+  const [permissionDenied, setPermissionDenied] = useState<boolean>(false);
   const { toast } = useToast();
+
+  // Reset permissions on retry
+  useEffect(() => {
+    if (permissionDenied && locationError === null) {
+      setPermissionDenied(false);
+    }
+  }, [locationError, permissionDenied]);
 
   const findNearestHospitals = () => {
     setLoading(true);
     setLocationError(null);
+    setPermissionDenied(false);
 
     if (!navigator.geolocation) {
       setLocationError("আপনার ব্রাউজারে লোকেশন সাপোর্ট করে না।");
@@ -100,13 +111,34 @@ const NearestHospital = () => {
       },
       (error) => {
         console.error("Geolocation error:", error);
-        setLocationError("আপনার লোকেশন অ্যাক্সেস করতে সমস্যা হয়েছে। দয়া করে অনুমতি দিন।");
+        
+        // More specific error messages based on the error code
+        if (error.code === 1) {
+          // Permission denied
+          setLocationError("লোকেশন অ্যাক্সেস করতে অনুমতি দেওয়া হয়নি। দয়া করে ব্রাউজার সেটিংস থেকে লোকেশন অনুমতি দিন।");
+          setPermissionDenied(true);
+        } else if (error.code === 2) {
+          // Position unavailable
+          setLocationError("আপনার বর্তমান অবস্থান নির্ধারণ করা যাচ্ছে না। দয়া করে GPS চালু করুন।");
+        } else if (error.code === 3) {
+          // Timeout
+          setLocationError("লোকেশন নির্ধারণ করতে সময় শেষ হয়ে গেছে। দয়া করে আবার চেষ্টা করুন।");
+        } else {
+          // Default error message
+          setLocationError("আপনার লোকেশন অ্যাক্সেস করতে সমস্যা হয়েছে। দয়া করে অনুমতি দিন।");
+        }
+        
         setLoading(false);
         toast({
           variant: "destructive",
           title: "লোকেশন পাওয়া যায়নি",
           description: "দয়া করে আপনার লোকেশন অ্যাক্সেস অনুমতি দিন।",
         });
+      },
+      { 
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
       }
     );
   };
@@ -120,6 +152,12 @@ const NearestHospital = () => {
     });
   };
 
+  const handleRetryLocation = () => {
+    // Request permissions again
+    setLocationError(null);
+    findNearestHospitals();
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -129,10 +167,19 @@ const NearestHospital = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {locationError && (
-          <div className="mb-4 p-3 bg-destructive/10 text-destructive rounded-md bangla">
-            {locationError}
-          </div>
+        {permissionDenied && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="ml-2 bangla">
+              লোকেশন অ্যাক্সেস করতে অনুমতি দেওয়া হয়নি। আপনার ব্রাউজার সেটিংস থেকে লোকেশন অনুমতি দিন।
+              <button 
+                onClick={handleRetryLocation}
+                className="block underline mt-2 ml-auto text-sm text-blue-600"
+              >
+                আবার চেষ্টা করুন
+              </button>
+            </AlertDescription>
+          </Alert>
         )}
 
         <LocationFinder 

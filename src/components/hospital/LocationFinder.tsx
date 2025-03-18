@@ -1,7 +1,8 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { MapPin, Loader2 } from "lucide-react";
+import { MapPin, Loader2, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface LocationFinderProps {
   loading: boolean;
@@ -19,7 +20,7 @@ const LocationFinder = ({
       <Button 
         onClick={findNearestHospitals}
         disabled={loading}
-        className="w-full bg-primary hover:bg-primary/90"
+        className="w-full bg-primary hover:bg-primary/90 transition-all duration-300"
       >
         {loading ? (
           <>
@@ -35,9 +36,12 @@ const LocationFinder = ({
       </Button>
       
       {locationError && (
-        <div className="mt-2 text-sm text-destructive bangla">
-          {locationError}
-        </div>
+        <Alert variant="destructive" className="mt-2">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="ml-2 text-sm bangla">
+            {locationError}
+          </AlertDescription>
+        </Alert>
       )}
     </div>
   );
