@@ -9,6 +9,7 @@ export const getNearbyPlaces = async (
 ) => {
   try {
     const { latitude, longitude } = position.coords;
+    console.log(`Searching for ${type}s near ${latitude},${longitude}`);
     
     // Convert blood_bank to a query since it's not a standard place type
     const searchType = type === 'blood_bank' ? 'establishment' : type;
@@ -17,16 +18,28 @@ export const getNearbyPlaces = async (
     const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=5000&type=${searchType}${query ? `&keyword=${query}` : ''}&key=${apiKey}`;
     
     // We'll call this API from our edge function
-    const response = await fetch(`/api/proxy-google-maps?url=${encodeURIComponent(url)}`);
+    const proxyUrl = `/api/proxy-google-maps?url=${encodeURIComponent(url)}`;
+    console.log(`Calling proxy URL: ${proxyUrl}`);
+    
+    const response = await fetch(proxyUrl);
     
     if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`);
+      const errorText = await response.text();
+      console.error(`API request failed with status ${response.status}:`, errorText);
+      throw new Error(`API request failed with status ${response.status}: ${errorText}`);
     }
     
     const data = await response.json();
+    console.log(`Got response for ${type}:`, data);
     
     if (data.error) {
+      console.error("API returned error:", data.error);
       throw new Error(data.error);
+    }
+    
+    if (!data.results) {
+      console.warn("No results found in API response:", data);
+      return [];
     }
     
     return data.results || [];
@@ -52,17 +65,26 @@ export const getDistanceMatrix = async (
     const response = await fetch(`/api/proxy-google-maps?url=${encodeURIComponent(url)}`);
     
     if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`);
+      const errorText = await response.text();
+      console.error(`Distance Matrix API request failed with status ${response.status}:`, errorText);
+      throw new Error(`API request failed with status ${response.status}: ${errorText}`);
     }
     
     const data = await response.json();
     
     if (data.error) {
+      console.error("Distance Matrix API returned error:", data.error);
       throw new Error(data.error);
     }
     
     if (!data.rows || !data.rows[0] || !data.rows[0].elements || !data.rows[0].elements[0]) {
-      throw new Error("Invalid response format from Distance Matrix API");
+      console.warn("Invalid response format from Distance Matrix API:", data);
+      return {
+        distance: "Unknown distance",
+        duration: "Unknown time",
+        distanceValue: 0,
+        durationValue: 0
+      };
     }
     
     return {

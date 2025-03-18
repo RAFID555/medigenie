@@ -55,11 +55,26 @@ const MedicalFacilityFinder = () => {
     const fetchApiKey = async () => {
       try {
         const { data, error } = await supabase.functions.invoke('proxy-google-maps', {
+          method: 'POST',
           body: { getKey: true }
         });
         
-        if (error) throw error;
-        setApiKey(data.key || null);
+        if (error) {
+          console.error("Error fetching API key:", error);
+          throw error;
+        }
+        
+        if (data?.key) {
+          console.log("API key retrieved successfully");
+          setApiKey(data.key || null);
+        } else {
+          console.error("No API key returned");
+          toast({
+            variant: "destructive",
+            title: "API কী পাওয়া যায়নি",
+            description: "দয়া করে আবার চেষ্টা করুন।",
+          });
+        }
       } catch (error) {
         console.error("Error fetching API key:", error);
         toast({
@@ -85,12 +100,24 @@ const MedicalFacilityFinder = () => {
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        console.log("Got user location:", position.coords.latitude, position.coords.longitude);
         setUserLocation(position);
         findNearbyFacilities(position, activeTab as 'hospitals' | 'pharmacies' | 'blood_banks');
       },
       (error) => {
         console.error("Geolocation error:", error);
-        setLocationError("আপনার লোকেশন অ্যাক্সেস করতে সমস্যা হয়েছে। দয়া করে অনুমতি দিন।");
+        
+        // More specific error messages based on the error code
+        if (error.code === 1) {
+          setLocationError("লোকেশন অ্যাক্সেস করতে অনুমতি দেওয়া হয়নি। দয়া করে ব্রাউজার সেটিংস থেকে লোকেশন অনুমতি দিন।");
+        } else if (error.code === 2) {
+          setLocationError("আপনার বর্তমান অবস্থান নির্ধারণ করা যাচ্ছে না। দয়া করে GPS চালু করুন।");
+        } else if (error.code === 3) {
+          setLocationError("লোকেশন নির্ধারণ করতে সময় শেষ হয়ে গেছে। দয়া করে আবার চেষ্টা করুন।");
+        } else {
+          setLocationError("আপনার লোকেশন অ্যাক্সেস করতে সমস্যা হয়েছে। দয়া করে অনুমতি দিন।");
+        }
+        
         setLoading(false);
         toast({
           variant: "destructive",
@@ -98,7 +125,11 @@ const MedicalFacilityFinder = () => {
           description: "দয়া করে আপনার লোকেশন অ্যাক্সেস অনুমতি দিন।",
         });
       },
-      { enableHighAccuracy: true }
+      { 
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
     );
   };
 
@@ -120,6 +151,8 @@ const MedicalFacilityFinder = () => {
     setFacilities([]);
 
     try {
+      console.log(`Finding nearby ${type}...`);
+      
       // Map our UI types to Google Places API types
       const placeType = type === 'hospitals' 
         ? 'hospital' 
@@ -129,6 +162,12 @@ const MedicalFacilityFinder = () => {
       
       // Get nearby places
       const places = await getNearbyPlaces(position, placeType as any, apiKey);
+      console.log(`Found ${places.length} places:`, places);
+      
+      if (places.length === 0) {
+        setLoading(false);
+        return;
+      }
       
       // Process each place to get distance information
       const facilitiesWithDistance = await Promise.all(
@@ -146,8 +185,8 @@ const MedicalFacilityFinder = () => {
               distance: distanceInfo.distance,
               duration: distanceInfo.duration,
               // Extract numeric values for sorting
-              distanceValue: parseInt(distanceInfo.distance.replace(/[^0-9.]/g, '')),
-              durationValue: parseInt(distanceInfo.duration.replace(/[^0-9.]/g, '')),
+              distanceValue: distanceInfo.distanceValue,
+              durationValue: distanceInfo.durationValue,
             };
           } catch (error) {
             console.error(`Error getting distance for ${place.name}:`, error);
@@ -158,6 +197,7 @@ const MedicalFacilityFinder = () => {
       
       // Rank facilities based on rating, distance, etc.
       const rankedFacilities = rankFacilities(facilitiesWithDistance);
+      console.log("Ranked facilities:", rankedFacilities);
       
       setFacilities(rankedFacilities);
       
