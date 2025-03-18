@@ -15,26 +15,36 @@ export const getNearbyPlaces = async (
     const searchType = type === 'blood_bank' ? 'establishment' : type;
     const query = type === 'blood_bank' ? 'blood bank' : '';
 
-    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=5000&type=${searchType}${query ? `&keyword=${query}` : ''}&key=${apiKey}`;
+    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=5000&type=${searchType}${query ? `&keyword=${query}` : ''}&key=API_KEY`;
     
     // We'll call this API from our edge function
     const proxyUrl = `/api/proxy-google-maps?url=${encodeURIComponent(url)}`;
-    console.log(`Calling proxy URL: ${proxyUrl}`);
+    console.log(`Calling proxy URL for ${type} search`);
     
     const response = await fetch(proxyUrl);
     
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`API request failed with status ${response.status}:`, errorText);
-      throw new Error(`API request failed with status ${response.status}: ${errorText}`);
+      const errorData = await response.json();
+      console.error(`API request failed with status ${response.status}:`, errorData);
+      throw new Error(errorData.error || `API request failed with status ${response.status}`);
     }
     
     const data = await response.json();
-    console.log(`Got response for ${type}:`, data);
+    console.log(`Got response for ${type} search with status:`, data.status);
     
     if (data.error) {
-      console.error("API returned error:", data.error);
-      throw new Error(data.error);
+      console.error("API returned error:", data.error, data.details);
+      throw new Error(data.error + (data.details ? `: ${data.details}` : ''));
+    }
+    
+    if (data.status === "REQUEST_DENIED") {
+      console.error("Google API request denied:", data.error_message);
+      throw new Error(`Google API request denied: ${data.error_message}`);
+    }
+    
+    if (data.status === "ZERO_RESULTS") {
+      console.log("No results found for this search");
+      return [];
     }
     
     if (!data.results) {
@@ -59,22 +69,28 @@ export const getDistanceMatrix = async (
     const { latitude, longitude } = position.coords;
     const origin = `${latitude},${longitude}`;
     
-    const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origin}&destinations=${encodeURIComponent(destination)}&key=${apiKey}`;
+    const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origin}&destinations=${encodeURIComponent(destination)}&key=API_KEY`;
     
     // We'll call this API from our edge function
+    console.log("Calling distance matrix API");
     const response = await fetch(`/api/proxy-google-maps?url=${encodeURIComponent(url)}`);
     
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Distance Matrix API request failed with status ${response.status}:`, errorText);
-      throw new Error(`API request failed with status ${response.status}: ${errorText}`);
+      const errorData = await response.json();
+      console.error(`Distance Matrix API request failed with status ${response.status}:`, errorData);
+      throw new Error(errorData.error || `API request failed with status ${response.status}`);
     }
     
     const data = await response.json();
     
     if (data.error) {
-      console.error("Distance Matrix API returned error:", data.error);
-      throw new Error(data.error);
+      console.error("Distance Matrix API returned error:", data.error, data.details);
+      throw new Error(data.error + (data.details ? `: ${data.details}` : ''));
+    }
+    
+    if (data.status === "REQUEST_DENIED") {
+      console.error("Google API request denied:", data.error_message);
+      throw new Error(`Google API request denied: ${data.error_message}`);
     }
     
     if (!data.rows || !data.rows[0] || !data.rows[0].elements || !data.rows[0].elements[0]) {

@@ -1,6 +1,5 @@
 
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -37,11 +36,13 @@ const GoogleMap = ({ places, userLocation, isLoading }: GoogleMapProps) => {
   const [markers, setMarkers] = useState<any[]>([]);
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [apiKeyError, setApiKeyError] = useState<string | null>(null);
+  const [apiKeyLoading, setApiKeyLoading] = useState(true);
 
   // Fetch API key
   useEffect(() => {
     const fetchApiKey = async () => {
       try {
+        setApiKeyLoading(true);
         console.log("Fetching API key from edge function");
         const { data, error } = await supabase.functions.invoke('proxy-google-maps', {
           method: 'POST',
@@ -58,6 +59,9 @@ const GoogleMap = ({ places, userLocation, isLoading }: GoogleMapProps) => {
           console.log("API key retrieved successfully");
           setApiKey(data.key);
           setApiKeyError(null);
+        } else if (data?.error) {
+          console.error("Edge function returned error:", data.error, data.details);
+          setApiKeyError(`API key error: ${data.error}${data.details ? ` - ${data.details}` : ''}`);
         } else {
           console.error("No API key returned from edge function");
           setApiKeyError("No API key returned from server");
@@ -65,6 +69,8 @@ const GoogleMap = ({ places, userLocation, isLoading }: GoogleMapProps) => {
       } catch (error) {
         console.error("Error fetching API key:", error);
         setApiKeyError(`Failed to get API key: ${error.message}`);
+      } finally {
+        setApiKeyLoading(false);
       }
     };
 
@@ -89,8 +95,8 @@ const GoogleMap = ({ places, userLocation, isLoading }: GoogleMapProps) => {
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initMap`;
     script.async = true;
     script.defer = true;
-    script.onerror = () => {
-      console.error("Failed to load Google Maps script");
+    script.onerror = (event) => {
+      console.error("Failed to load Google Maps script", event);
       setApiKeyError("Failed to load Google Maps script. The API key might be invalid.");
     };
     document.head.appendChild(script);
@@ -132,6 +138,7 @@ const GoogleMap = ({ places, userLocation, isLoading }: GoogleMapProps) => {
       });
     } catch (error) {
       console.error("Error initializing map:", error);
+      setApiKeyError(`Error initializing map: ${error.message}`);
     }
   }, [mapLoaded, userLocation]);
 
@@ -205,9 +212,9 @@ const GoogleMap = ({ places, userLocation, isLoading }: GoogleMapProps) => {
 
   return (
     <div className="relative w-full h-full min-h-[300px] rounded-lg overflow-hidden border">
-      {(isLoading || !mapLoaded || !apiKey || apiKeyError) && (
+      {(isLoading || apiKeyLoading || !mapLoaded || apiKeyError) && (
         <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-10">
-          <div className="flex flex-col items-center gap-2 max-w-xs text-center">
+          <div className="flex flex-col items-center gap-2 max-w-xs text-center p-4">
             {apiKeyError ? (
               <>
                 <div className="text-destructive">
@@ -218,14 +225,17 @@ const GoogleMap = ({ places, userLocation, isLoading }: GoogleMapProps) => {
                   </svg>
                 </div>
                 <p className="text-sm text-destructive bangla">
-                  মানচিত্র লোড করতে সমস্যা হয়েছে। API কী সমস্যা হতে পারে।
+                  {apiKeyError}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Please check Google Maps API key configuration
                 </p>
               </>
             ) : (
               <>
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 <p className="text-sm text-muted-foreground bangla">
-                  {!apiKey ? 'API কী লোড হচ্ছে...' : !mapLoaded ? 'মানচিত্র লোড হচ্ছে...' : 'স্থান খুঁজছে...'}
+                  {apiKeyLoading ? 'API কী লোড হচ্ছে...' : !mapLoaded ? 'মানচিত্র লোড হচ্ছে...' : 'স্থান খুঁজছে...'}
                 </p>
               </>
             )}

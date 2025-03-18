@@ -28,7 +28,10 @@ serve(async (req) => {
         if (!apiKey) {
           console.error("Google Maps API key is not set in the environment");
           return new Response(
-            JSON.stringify({ error: 'Google Maps API key is not configured' }),
+            JSON.stringify({ 
+              error: 'Google Maps API key is not configured',
+              details: 'Please check Supabase secrets configuration'
+            }),
             { 
               status: 500, 
               headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -67,7 +70,10 @@ serve(async (req) => {
     if (!apiKey) {
       console.error("Google Maps API key is not set in the environment");
       return new Response(
-        JSON.stringify({ error: 'Google Maps API key is not configured' }),
+        JSON.stringify({ 
+          error: 'Google Maps API key is not configured',
+          details: 'Please check Supabase secrets configuration'
+        }),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -75,18 +81,21 @@ serve(async (req) => {
       );
     }
     
-    const finalUrl = url.replace('API_KEY', apiKey || '');
-    console.log(`Proxying request to: ${finalUrl}`);
+    const finalUrl = url.replace('API_KEY', apiKey);
+    console.log(`Proxying request to Google Maps API`);
 
     // Make the request to Google Maps API
     const response = await fetch(finalUrl);
     
     if (!response.ok) {
       console.error(`Google API responded with status ${response.status}`);
+      const errorText = await response.text();
+      console.error(`Error details: ${errorText}`);
+      
       return new Response(
         JSON.stringify({ 
           error: `Google API responded with status ${response.status}`,
-          details: await response.text()
+          details: errorText
         }),
         { 
           status: response.status, 
@@ -97,6 +106,21 @@ serve(async (req) => {
     
     const data = await response.json();
     console.log("Google API response status:", data.status);
+
+    // Check for API-specific errors
+    if (data.status === "REQUEST_DENIED") {
+      console.error("Google API request denied:", data.error_message);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Google API request denied', 
+          details: data.error_message
+        }),
+        { 
+          status: 403, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
 
     // Return the response
     return new Response(
@@ -110,7 +134,10 @@ serve(async (req) => {
     console.error('Error in proxy-google-maps function:', error);
     
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        stack: error.stack 
+      }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
