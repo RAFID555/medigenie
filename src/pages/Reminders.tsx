@@ -200,22 +200,6 @@ const Reminders = () => {
           </div>
         </div>
         
-        <Card className="p-3 bg-red-100 border-red-300 mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <PhoneCall className="h-5 w-5 text-red-600" />
-            <p className="font-medium bangla">জরুরী সাহায্য: ৯৯৯</p>
-          </div>
-          <Button 
-            variant="destructive" 
-            size="sm" 
-            className="gap-1" 
-            onClick={() => window.location.href = "tel:999"}
-          >
-            <PhoneCall className="h-3 w-3" />
-            <span className="bangla">কল করুন</span>
-          </Button>
-        </Card>
-        
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card className="p-4 text-center flex flex-col items-center justify-center aspect-video">
             <Clock className="h-8 w-8 text-muted-foreground mb-2" />
