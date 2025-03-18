@@ -2,7 +2,7 @@
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PhoneCall, Ambulance, Heart, User, Map } from "lucide-react";
+import { PhoneCall, Ambulance, Heart, User } from "lucide-react";
 import MedicalFacilityFinder from "@/components/MedicalFacilityFinder";
 
 const Emergency = () => {
