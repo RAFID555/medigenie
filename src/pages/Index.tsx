@@ -1,10 +1,8 @@
 
-import { useState } from "react";
 import Layout from "@/components/Layout";
 import MedicalFacilityFinder from "@/components/MedicalFacilityFinder";
 import RepresentativeHelp from "@/components/RepresentativeHelp";
 import AppointmentPayment from "@/components/AppointmentPayment";
-import HealthTracker from "@/components/HealthTracker";
 
 const Index = () => {
   return (
@@ -18,7 +16,6 @@ const Index = () => {
           
           <div className="space-y-6">
             <RepresentativeHelp />
-            <HealthTracker />
           </div>
         </div>
       </div>

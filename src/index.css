@@ -76,6 +76,15 @@
     --border: 217 33% 18%;
     --input: 217 33% 18%;
     --ring: 213 27% 84%;
+
+    --sidebar-background: 220 20% 14%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 210 40% 98%;
+    --sidebar-primary-foreground: 220 20% 14%;
+    --sidebar-accent: 217 33% 22%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 33% 25%;
+    --sidebar-ring: 213 27% 84%;
   }
 }
 

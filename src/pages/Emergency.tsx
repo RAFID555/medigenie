@@ -3,7 +3,6 @@ import Layout from "@/components/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PhoneCall, Ambulance, Heart, User } from "lucide-react";
-import MedicalFacilityFinder from "@/components/MedicalFacilityFinder";
 
 const Emergency = () => {
   return (
@@ -16,15 +15,10 @@ const Emergency = () => {
           </p>
         </div>
         
-        {/* Map Component */}
-        <div className="mb-6">
-          <MedicalFacilityFinder />
-        </div>
-        
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Emergency Call Section */}
           <Card className="border-red-200">
-            <CardHeader className="bg-red-50 rounded-t-lg">
+            <CardHeader className="bg-red-50 rounded-t-lg dark:bg-red-950/20">
               <CardTitle className="flex items-center gap-2 bangla">
                 <PhoneCall className="h-5 w-5 text-red-600" />
                 জরুরী কল
@@ -55,7 +49,7 @@ const Emergency = () => {
           
           {/* Ambulance Section */}
           <Card className="border-orange-200">
-            <CardHeader className="bg-orange-50 rounded-t-lg">
+            <CardHeader className="bg-orange-50 rounded-t-lg dark:bg-orange-950/20">
               <CardTitle className="flex items-center gap-2 bangla">
                 <Ambulance className="h-5 w-5 text-orange-600" />
                 অ্যাম্বুলেন্স সার্ভিস
@@ -86,7 +80,7 @@ const Emergency = () => {
           
           {/* Blood Bank Section */}
           <Card className="border-red-200">
-            <CardHeader className="bg-red-50 rounded-t-lg">
+            <CardHeader className="bg-red-50 rounded-t-lg dark:bg-red-950/20">
               <CardTitle className="flex items-center gap-2 bangla">
                 <Heart className="h-5 w-5 text-red-600" />
                 ব্লাড ব্যাংক সাপোর্ট
@@ -117,7 +111,7 @@ const Emergency = () => {
           
           {/* Speed Dial Section */}
           <Card className="border-blue-200">
-            <CardHeader className="bg-blue-50 rounded-t-lg">
+            <CardHeader className="bg-blue-50 rounded-t-lg dark:bg-blue-950/20">
               <CardTitle className="flex items-center gap-2 bangla">
                 <User className="h-5 w-5 text-blue-600" />
                 স্পিড ডায়াল আত্মীয়

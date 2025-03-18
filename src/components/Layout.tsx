@@ -2,10 +2,11 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Home, FileText, Bell, ShoppingBag, Menu, X, Settings, LogOut, Activity, Info, PhoneCall, Ambulance, Heart } from "lucide-react";
+import { Home, FileText, Bell, ShoppingBag, Menu, X, Settings, LogOut, Activity, Info, PhoneCall, Ambulance } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import { Button } from "./ui/button";
 import { toast } from "@/hooks/use-toast";
+import DarkModeToggle from "./DarkModeToggle";
 
 export const Layout = ({ children }: { children: React.ReactNode }) => {
   const { user, signOut } = useAuth();
@@ -96,13 +97,17 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
             <span className="bg-primary rounded-md p-1 text-primary-foreground">মেডি</span>
             <span>জিনি</span>
           </Link>
-          <button
-            className="block md:hidden p-2"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+          
+          <div className="flex items-center space-x-2">
+            <DarkModeToggle />
+            <button
+              className="block md:hidden p-2"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
         </div>
       </header>
       
