@@ -1,5 +1,5 @@
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Camera, RefreshCw, Check } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
@@ -16,7 +16,7 @@ const CameraCapture = ({ onCapture, onCancel }: CameraCaptureProps) => {
   const { toast } = useToast();
   
   // Start camera when component mounts
-  useState(() => {
+  useEffect(() => {
     startCamera();
     return () => {
       // Clean up camera on unmount
