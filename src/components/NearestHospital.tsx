@@ -135,6 +135,12 @@ const NearestHospital = () => {
           </div>
         )}
 
+        <LocationFinder 
+          loading={loading}
+          locationError={locationError}
+          findNearestHospitals={findNearestHospitals}
+        />
+        
         <EmergencyActions 
           nearbyHospitals={nearbyHospitals}
           loading={loading}
