@@ -73,7 +73,7 @@
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
     
-    --border: 217 33% 18%;
+    --border: 217 33% 22%;
     --input: 217 33% 18%;
     --ring: 213 27% 84%;
 
@@ -95,6 +95,11 @@
   body {
     @apply bg-background text-foreground font-sans;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  /* Transition for dark mode toggle */
+  body, .bg-background, .bg-card, .border-border, .text-foreground, .text-muted-foreground {
+    @apply transition-colors duration-300;
   }
   
   /* Bangla text */
