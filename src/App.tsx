@@ -11,6 +11,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import HealthTracker from "./pages/HealthTracker";
 import AboutUs from "./pages/AboutUs";
 import Emergency from "./pages/Emergency";
+import PetCare from "./pages/PetCare";
 
 function App() {
   return (
@@ -77,6 +78,14 @@ function App() {
         element={
           <ProtectedRoute>
             <Emergency />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/pet-care"
+        element={
+          <ProtectedRoute>
+            <PetCare />
           </ProtectedRoute>
         }
       />

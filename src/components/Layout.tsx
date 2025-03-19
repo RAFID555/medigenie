@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Home, FileText, Bell, ShoppingBag, Menu, X, Settings, LogOut, Activity, Info, PhoneCall, Ambulance } from "lucide-react";
+import { Home, FileText, Bell, ShoppingBag, Menu, X, Settings, LogOut, Activity, Info, PhoneCall, Ambulance, PawPrint } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import { Button } from "./ui/button";
 import { toast } from "@/hooks/use-toast";
@@ -73,6 +73,11 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
       label: "হেলথ ট্র্যাকার",
       icon: <Activity className="h-5 w-5" />,
       href: "/health-tracker",
+    },
+    {
+      label: "পেট কেয়ার",
+      icon: <PawPrint className="h-5 w-5" />,
+      href: "/pet-care",
     },
     {
       label: "সেটিংস",
