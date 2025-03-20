@@ -10,7 +10,7 @@ import {
   PawPrint, 
   Calendar, 
   Syringe, 
-  Pills, 
+  Pill, 
   Clipboard, 
   Plus,
   X,
@@ -177,7 +177,7 @@ const PetCare = () => {
               <span className="bangla">টিকা</span>
             </TabsTrigger>
             <TabsTrigger value="medications" className="flex items-center gap-2">
-              <Pills className="h-4 w-4" />
+              <Pill className="h-4 w-4" />
               <span className="bangla">ওষুধ</span>
             </TabsTrigger>
           </TabsList>
@@ -393,7 +393,7 @@ const PetCare = () => {
             <Card className="border-border bg-card shadow-sm">
               <CardHeader className="flex flex-row items-center gap-3">
                 <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Pills className="h-5 w-5 text-primary" />
+                  <Pill className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <CardTitle className="text-xl font-semibold bangla">
@@ -411,7 +411,7 @@ const PetCare = () => {
                       <AccordionItem key={medication.id} value={medication.id}>
                         <AccordionTrigger className="hover:no-underline">
                           <div className="flex items-center gap-2">
-                            <Pills className="h-4 w-4 text-primary" />
+                            <Pill className="h-4 w-4 text-primary" />
                             <span>{medication.petName} - {medication.medicationName}</span>
                           </div>
                         </AccordionTrigger>
