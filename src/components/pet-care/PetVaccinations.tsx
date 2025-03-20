@@ -1,54 +1,35 @@
 
-import { useState } from "react";
+import React, { useState, memo, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Syringe, Plus, X, Check } from "lucide-react";
+import { Syringe, Plus } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-
-interface PetVaccination {
-  id: string;
-  petName: string;
-  vaccineName: string;
-  date: string;
-  nextDueDate: string;
-  completed: boolean;
-}
+import PetCareForm from "./PetCareForm";
+import { PetVaccination } from "@/hooks/usePetCareStorage";
 
 interface PetVaccinationsProps {
   vaccinations: PetVaccination[];
   setVaccinations: (vaccinations: PetVaccination[]) => void;
 }
 
-const PetVaccinations = ({ vaccinations, setVaccinations }: PetVaccinationsProps) => {
+const PetVaccinations = memo(({ vaccinations, setVaccinations }: PetVaccinationsProps) => {
   const [showVaccinationForm, setShowVaccinationForm] = useState(false);
-  const [newVaccination, setNewVaccination] = useState<Omit<PetVaccination, "id" | "completed">>({
-    petName: "",
-    vaccineName: "",
-    date: "",
-    nextDueDate: ""
-  });
 
-  const handleAddVaccination = () => {
-    if (newVaccination.petName && newVaccination.vaccineName && newVaccination.date) {
-      const vaccination: PetVaccination = {
-        ...newVaccination,
-        id: Date.now().toString(),
-        completed: false
-      };
-      setVaccinations([...vaccinations, vaccination]);
-      setNewVaccination({
-        petName: "",
-        vaccineName: "",
-        date: "",
-        nextDueDate: ""
-      });
-      setShowVaccinationForm(false);
-    }
-  };
+  const handleAddVaccination = useCallback((data: Omit<PetVaccination, "id" | "completed">) => {
+    const vaccination: PetVaccination = {
+      ...data,
+      id: Date.now().toString(),
+      completed: false
+    };
+    setVaccinations([...vaccinations, vaccination]);
+    setShowVaccinationForm(false);
+  }, [vaccinations, setVaccinations]);
 
-  const toggleVaccinationStatus = (id: string) => {
+  const handleCancelForm = useCallback(() => {
+    setShowVaccinationForm(false);
+  }, []);
+
+  const toggleVaccinationStatus = useCallback((id: string) => {
     setVaccinations(
       vaccinations.map(vaccination => 
         vaccination.id === id 
@@ -56,7 +37,7 @@ const PetVaccinations = ({ vaccinations, setVaccinations }: PetVaccinationsProps
           : vaccination
       )
     );
-  };
+  }, [vaccinations, setVaccinations]);
 
   return (
     <Card className="border-border bg-card shadow-sm">
@@ -77,7 +58,7 @@ const PetVaccinations = ({ vaccinations, setVaccinations }: PetVaccinationsProps
         {vaccinations.length > 0 ? (
           <div className="space-y-2">
             {vaccinations.map((vaccination) => (
-              <div key={vaccination.id} className="flex items-center justify-between p-3 border rounded-md">
+              <div key={vaccination.id} className="flex items-center justify-between p-3 border rounded-md bg-card/80 hover:bg-accent/10 transition-colors">
                 <div className="flex items-center gap-3">
                   <Checkbox 
                     id={`vaccination-${vaccination.id}`} 
@@ -102,60 +83,21 @@ const PetVaccinations = ({ vaccinations, setVaccinations }: PetVaccinationsProps
         )}
         
         {showVaccinationForm ? (
-          <div className="mt-4 p-4 border rounded-md bg-background">
-            <div className="grid gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="petName">পোষা প্রাণীর নাম</Label>
-                <Input 
-                  id="petName" 
-                  value={newVaccination.petName} 
-                  onChange={(e) => setNewVaccination({...newVaccination, petName: e.target.value})}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="vaccineName">টিকার নাম</Label>
-                <Input 
-                  id="vaccineName" 
-                  value={newVaccination.vaccineName} 
-                  onChange={(e) => setNewVaccination({...newVaccination, vaccineName: e.target.value})}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="date">তারিখ</Label>
-                <Input 
-                  id="date" 
-                  type="date" 
-                  value={newVaccination.date} 
-                  onChange={(e) => setNewVaccination({...newVaccination, date: e.target.value})}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="nextDueDate">পরবর্তী সময়সূচী</Label>
-                <Input 
-                  id="nextDueDate" 
-                  type="date"
-                  value={newVaccination.nextDueDate} 
-                  onChange={(e) => setNewVaccination({...newVaccination, nextDueDate: e.target.value})}
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" type="button" onClick={() => setShowVaccinationForm(false)}>
-                  <X className="mr-2 h-4 w-4" /> বাতিল
-                </Button>
-                <Button type="button" onClick={handleAddVaccination}>
-                  <Check className="mr-2 h-4 w-4" /> সংরক্ষণ
-                </Button>
-              </div>
-            </div>
-          </div>
+          <PetCareForm 
+            formType="vaccination"
+            onSubmit={handleAddVaccination}
+            onCancel={handleCancelForm}
+          />
         ) : (
           <Button className="w-full mt-4" onClick={() => setShowVaccinationForm(true)}>
-            <Plus className="mr-2 h-4 w-4" /> নতুন টিকা যোগ করুন
+            <Plus className="mr-2 h-4 w-4" /> <span className="bangla">নতুন টিকা যোগ করুন</span>
           </Button>
         )}
       </CardContent>
     </Card>
   );
-};
+});
+
+PetVaccinations.displayName = "PetVaccinations";
 
 export default PetVaccinations;

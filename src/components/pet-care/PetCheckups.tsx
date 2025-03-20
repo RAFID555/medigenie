@@ -1,55 +1,37 @@
 
-import { useState } from "react";
+import React, { useState, memo, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Calendar, PawPrint, Plus, X, Check } from "lucide-react";
+import { Calendar, PawPrint, Plus } from "lucide-react";
 import { 
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger
 } from "@/components/ui/accordion";
-
-interface PetCheckup {
-  id: string;
-  petName: string;
-  date: string;
-  veterinarian: string;
-  notes: string;
-}
+import PetCareForm from "./PetCareForm";
+import { PetCheckup } from "@/hooks/usePetCareStorage";
 
 interface PetCheckupsProps {
   checkups: PetCheckup[];
   setCheckups: (checkups: PetCheckup[]) => void;
 }
 
-const PetCheckups = ({ checkups, setCheckups }: PetCheckupsProps) => {
+const PetCheckups = memo(({ checkups, setCheckups }: PetCheckupsProps) => {
   const [showCheckupForm, setShowCheckupForm] = useState(false);
-  const [newCheckup, setNewCheckup] = useState<Omit<PetCheckup, "id">>({
-    petName: "",
-    date: "",
-    veterinarian: "",
-    notes: ""
-  });
 
-  const handleAddCheckup = () => {
-    if (newCheckup.petName && newCheckup.date) {
-      const checkup: PetCheckup = {
-        ...newCheckup,
-        id: Date.now().toString()
-      };
-      setCheckups([...checkups, checkup]);
-      setNewCheckup({
-        petName: "",
-        date: "",
-        veterinarian: "",
-        notes: ""
-      });
-      setShowCheckupForm(false);
-    }
-  };
+  const handleAddCheckup = useCallback((data: Omit<PetCheckup, "id">) => {
+    const checkup: PetCheckup = {
+      ...data,
+      id: Date.now().toString()
+    };
+    setCheckups([...checkups, checkup]);
+    setShowCheckupForm(false);
+  }, [checkups, setCheckups]);
+
+  const handleCancelForm = useCallback(() => {
+    setShowCheckupForm(false);
+  }, []);
 
   return (
     <Card className="border-border bg-card shadow-sm">
@@ -102,59 +84,21 @@ const PetCheckups = ({ checkups, setCheckups }: PetCheckupsProps) => {
         )}
         
         {showCheckupForm ? (
-          <div className="mt-4 p-4 border rounded-md bg-background">
-            <div className="grid gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="petName">পোষা প্রাণীর নাম</Label>
-                <Input 
-                  id="petName" 
-                  value={newCheckup.petName} 
-                  onChange={(e) => setNewCheckup({...newCheckup, petName: e.target.value})}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="date">তারিখ</Label>
-                <Input 
-                  id="date" 
-                  type="date" 
-                  value={newCheckup.date} 
-                  onChange={(e) => setNewCheckup({...newCheckup, date: e.target.value})}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="veterinarian">ভেটেরিনারিয়ান</Label>
-                <Input 
-                  id="veterinarian" 
-                  value={newCheckup.veterinarian} 
-                  onChange={(e) => setNewCheckup({...newCheckup, veterinarian: e.target.value})}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="notes">নোট</Label>
-                <Input 
-                  id="notes" 
-                  value={newCheckup.notes} 
-                  onChange={(e) => setNewCheckup({...newCheckup, notes: e.target.value})}
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" type="button" onClick={() => setShowCheckupForm(false)}>
-                  <X className="mr-2 h-4 w-4" /> বাতিল
-                </Button>
-                <Button type="button" onClick={handleAddCheckup}>
-                  <Check className="mr-2 h-4 w-4" /> সংরক্ষণ
-                </Button>
-              </div>
-            </div>
-          </div>
+          <PetCareForm 
+            formType="checkup"
+            onSubmit={handleAddCheckup}
+            onCancel={handleCancelForm}
+          />
         ) : (
           <Button className="w-full mt-4" onClick={() => setShowCheckupForm(true)}>
-            <Plus className="mr-2 h-4 w-4" /> নতুন চেকআপ যোগ করুন
+            <Plus className="mr-2 h-4 w-4" /> <span className="bangla">নতুন চেকআপ যোগ করুন</span>
           </Button>
         )}
       </CardContent>
     </Card>
   );
-};
+});
+
+PetCheckups.displayName = "PetCheckups";
 
 export default PetCheckups;

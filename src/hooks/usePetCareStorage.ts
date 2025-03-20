@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export interface PetCheckup {
   id: string;
@@ -29,19 +29,19 @@ export interface PetMedication {
   notes: string;
 }
 
-// Custom hook to persist pet data in localStorage
+// Custom hook to persist pet data in localStorage with memoized setters
 const usePetCareStorage = () => {
-  const [checkups, setCheckups] = useState<PetCheckup[]>(() => {
+  const [checkups, setCheckupsState] = useState<PetCheckup[]>(() => {
     const savedCheckups = localStorage.getItem('petCheckups');
     return savedCheckups ? JSON.parse(savedCheckups) : [];
   });
 
-  const [vaccinations, setVaccinations] = useState<PetVaccination[]>(() => {
+  const [vaccinations, setVaccinationsState] = useState<PetVaccination[]>(() => {
     const savedVaccinations = localStorage.getItem('petVaccinations');
     return savedVaccinations ? JSON.parse(savedVaccinations) : [];
   });
 
-  const [medications, setMedications] = useState<PetMedication[]>(() => {
+  const [medications, setMedicationsState] = useState<PetMedication[]>(() => {
     const savedMedications = localStorage.getItem('petMedications');
     return savedMedications ? JSON.parse(savedMedications) : [];
   });
@@ -60,6 +60,19 @@ const usePetCareStorage = () => {
   useEffect(() => {
     localStorage.setItem('petMedications', JSON.stringify(medications));
   }, [medications]);
+
+  // Create memoized setters to prevent unnecessary re-renders
+  const setCheckups = useCallback((newCheckups: PetCheckup[]) => {
+    setCheckupsState(newCheckups);
+  }, []);
+
+  const setVaccinations = useCallback((newVaccinations: PetVaccination[]) => {
+    setVaccinationsState(newVaccinations);
+  }, []);
+
+  const setMedications = useCallback((newMedications: PetMedication[]) => {
+    setMedicationsState(newMedications);
+  }, []);
 
   return {
     checkups,
