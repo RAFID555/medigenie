@@ -6,32 +6,32 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
-import { User, LogIn } from "lucide-react";
+import { User, LogIn, LogInWith } from "lucide-react";
 
 const AuthPage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Login form state
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  
+
   // Register form state
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
   const [registerFullName, setRegisterFullName] = useState("");
   const [registerPhone, setRegisterPhone] = useState("");
-  
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email: loginEmail,
         password: loginPassword,
       });
-      
+
       if (error) {
         toast({
           title: "লগইন ব্যর্থ হয়েছে",
@@ -55,11 +55,35 @@ const AuthPage = () => {
       setIsLoading(false);
     }
   };
-  
+
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+      if (error) {
+        toast({
+          title: "গুগল লগইন ব্যর্থ হয়েছে",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        navigate("/");
+      }
+    } catch (error: any) {
+      toast({
+        title: "একটি ত্রুটি ঘটেছে",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       const { error } = await supabase.auth.signUp({
         email: registerEmail,
@@ -71,7 +95,7 @@ const AuthPage = () => {
           },
         },
       });
-      
+
       if (error) {
         toast({
           title: "রেজিস্ট্রেশন ব্যর্থ হয়েছে",
@@ -99,7 +123,7 @@ const AuthPage = () => {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-8">
@@ -107,13 +131,13 @@ const AuthPage = () => {
           <h1 className="text-3xl font-bold bangla">মেডিজিনি</h1>
           <p className="text-muted-foreground mt-2 bangla">আপনার ঔষধ বুঝতে সাহায্য করি</p>
         </div>
-        
+
         <Tabs defaultValue="login" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="login" className="bangla">লগইন</TabsTrigger>
             <TabsTrigger value="register" className="bangla">রেজিস্ট্রেশন</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="login">
             <div className="bg-card p-6 rounded-lg shadow-md border">
               <form onSubmit={handleLogin} className="space-y-4">
@@ -128,7 +152,7 @@ const AuthPage = () => {
                     required
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="password" className="bangla">পাসওয়ার্ড</Label>
                   <Input
@@ -140,7 +164,7 @@ const AuthPage = () => {
                     required
                   />
                 </div>
-                
+
                 <Button
                   type="submit"
                   className="w-full gap-2"
@@ -156,9 +180,23 @@ const AuthPage = () => {
                   )}
                 </Button>
               </form>
+              <Button
+                onClick={handleGoogleLogin}
+                className="w-full gap-2 mt-4"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <span className="bangla">লোড হচ্ছে...</span>
+                ) : (
+                  <>
+                    <LogInWith className="h-4 w-4" />
+                    <span className="bangla">গুগল দিয়ে লগইন করুন</span>
+                  </>
+                )}
+              </Button>
             </div>
           </TabsContent>
-          
+
           <TabsContent value="register">
             <div className="bg-card p-6 rounded-lg shadow-md border">
               <form onSubmit={handleRegister} className="space-y-4">
@@ -173,7 +211,7 @@ const AuthPage = () => {
                     required
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="registerEmail" className="bangla">ইমেইল</Label>
                   <Input
@@ -185,7 +223,7 @@ const AuthPage = () => {
                     required
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="phone" className="bangla">ফোন নাম্বার</Label>
                   <Input
@@ -196,7 +234,7 @@ const AuthPage = () => {
                     onChange={(e) => setRegisterPhone(e.target.value)}
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="registerPassword" className="bangla">পাসওয়ার্ড</Label>
                   <Input
@@ -208,7 +246,7 @@ const AuthPage = () => {
                     required
                   />
                 </div>
-                
+
                 <Button
                   type="submit"
                   className="w-full gap-2"
