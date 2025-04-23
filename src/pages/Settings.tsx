@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Layout from "@/components/Layout";
 import { Card } from "@/components/ui/card";
@@ -8,19 +7,23 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { 
-  Bell,
-  Clock,
-  Languages,
-  Globe,
+  User,
+  Mail,
   Phone,
   MapPin,
+  Languages,
+  Globe,
+  Bell,
+  Clock,
   Save,
-  User,
-  Mail
+  Settings,
+  Edit
 } from "lucide-react";
 
 const Settings = () => {
   const { toast } = useToast();
+
+  const [profileMode, setProfileMode] = useState<"view" | "edit">("view");
   
   const [settings, setSettings] = useState({
     notifications: true,
@@ -52,6 +55,7 @@ const Settings = () => {
       title: settings.language === "english" ? "Settings Updated" : "সেটিংস আপডেট হয়েছে",
       description: settings.language === "english" ? "Your settings have been saved successfully." : "আপনার সেটিংস সফলভাবে সংরক্ষণ করা হয়েছে।"
     });
+    setProfileMode("view");
   };
   
   const getLabel = (banglaText: string, englishText: string) => {
@@ -61,21 +65,68 @@ const Settings = () => {
   return (
     <Layout>
       <div className="page-container max-w-4xl">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold">
-            {getLabel("সেটিংস", "Settings")}
-          </h1>
-          <p className="text-muted-foreground">
-            {getLabel("অ্যাপ্লিকেশন পছন্দসমূহ কাস্টমাইজ করুন", "Customize application preferences")}
-          </p>
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex gap-2">
+            <Button
+              variant={profileMode === "view" ? "default" : "outline"}
+              onClick={() => setProfileMode("view")}
+              className="gap-2"
+            >
+              <User className="h-4 w-4" />
+              <span>{getLabel("প্রোফাইল দেখুন", "View Profile")}</span>
+            </Button>
+            <Button
+              variant={profileMode === "edit" ? "default" : "outline"}
+              onClick={() => setProfileMode("edit")}
+              className="gap-2"
+            >
+              <Edit className="h-4 w-4" />
+              <span>{getLabel("প্রোফাইল সম্পাদনা", "Edit Profile")}</span>
+            </Button>
+          </div>
         </div>
         
-        <div className="space-y-6">
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold mb-4">
-              {getLabel("ব্যক্তিগত তথ্য", "Personal Information")}
-            </h2>
-            
+        <Card className="p-6 mb-6">
+          <h2 className="text-lg font-semibold mb-4">
+            {getLabel("ব্যক্তিগত তথ্য", "Personal Information")}
+          </h2>
+          
+          {profileMode === "view" ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">{getLabel("নাম", "Name")}</label>
+                  <div className="flex items-center gap-2 bg-muted px-3 py-2 rounded">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span>{settings.name}</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">{getLabel("ইমেইল", "Email")}</label>
+                  <div className="flex items-center gap-2 bg-muted px-3 py-2 rounded">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <span>{settings.email}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">{getLabel("ফোন নম্বর", "Phone Number")}</label>
+                  <div className="flex items-center gap-2 bg-muted px-3 py-2 rounded">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <span>{settings.phone}</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">{getLabel("ঠিকানা", "Address")}</label>
+                  <div className="flex items-center gap-2 bg-muted px-3 py-2 rounded">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span>{settings.address}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -137,8 +188,10 @@ const Settings = () => {
                 </div>
               </div>
             </div>
-          </Card>
-          
+          )}
+        </Card>
+        
+        <div className="space-y-6">
           <Card className="p-6">
             <h2 className="text-lg font-semibold mb-4">
               {getLabel("ভাষা এবং রিজিওনাল", "Language and Regional")}
@@ -243,15 +296,17 @@ const Settings = () => {
           </Card>
           
           <div className="flex justify-end">
-            <Button 
-              className="gap-2 px-6" 
-              onClick={handleSave}
-            >
-              <Save className="h-4 w-4" />
-              <span>
-                {getLabel("সংরক্ষণ করুন", "Save")}
-              </span>
-            </Button>
+            {profileMode === "edit" && (
+              <Button 
+                className="gap-2 px-6" 
+                onClick={handleSave}
+              >
+                <Save className="h-4 w-4" />
+                <span>
+                  {getLabel("সংরক্ষণ করুন", "Save")}
+                </span>
+              </Button>
+            )}
           </div>
         </div>
       </div>

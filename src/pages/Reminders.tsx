@@ -28,6 +28,7 @@ const Reminders = () => {
       dosage: "১টা ট্যাবলেট",
       time: "দুপুর ২:০০",
       running: true,
+      reminderType: "ring" as "ring",
     },
     {
       id: "2",
@@ -35,6 +36,7 @@ const Reminders = () => {
       dosage: "১টা ট্যাবলেট",
       time: "রাত ১০:৩০",
       upcoming: true,
+      reminderType: "silent" as "silent",
     },
     {
       id: "3",
@@ -43,6 +45,7 @@ const Reminders = () => {
       time: "সকাল ৮:০০",
       upcoming: true,
       remainingDays: 2,
+      reminderType: "vibration" as "vibration",
     },
   ];
   
@@ -53,6 +56,7 @@ const Reminders = () => {
       dosage: "১টা ট্যাবলেট",
       time: "সকাল ৯:০০",
       completed: true,
+      reminderType: "ring" as "ring"
     },
     {
       id: "5",
@@ -60,6 +64,7 @@ const Reminders = () => {
       dosage: "১টা ট্যাবলেট",
       time: "দুপুর ১:০০",
       completed: true,
+      reminderType: "silent" as "silent"
     },
   ];
   
@@ -107,7 +112,7 @@ const Reminders = () => {
         if (permission === "granted") {
           toast({
             title: "নোটিফিকেশন সক্রিয় করা হয়েছে",
-            description: "আপনি এখন ঔষধ খাওয়ার রিমাইন্ডার পাবেন",
+            description: "আপনি এখন ঔষধ খাওয়া�� রিমাইন্ডার পাবেন",
           });
         } else {
           toast({
