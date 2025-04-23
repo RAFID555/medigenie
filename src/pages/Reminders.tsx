@@ -7,12 +7,20 @@ import ReminderCard from "@/components/ReminderCard";
 import { Plus, Clock, CheckCircle, Bell, Calendar, PhoneCall } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { toast as sonnerToast } from "sonner";
+import { BellOff, BellRing, Vibrate } from "lucide-react";
 
 const Reminders = () => {
   const { toast } = useToast();
   const [notificationsPermission, setNotificationsPermission] = useState<string | null>(null);
   const [missedDays, setMissedDays] = useState<{[key: string]: number}>({});
-  
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({
+    medicineName: "",
+    dosage: "",
+    time: "",
+    reminderType: "ring" as "ring" | "silent" | "vibration"
+  });
+
   const activeReminders = [
     {
       id: "1",
@@ -114,6 +122,23 @@ const Reminders = () => {
     }
   };
 
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setForm(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+  };
+
+  const handleAddReminder = (e: React.FormEvent) => {
+    e.preventDefault();
+    setShowForm(false);
+    setForm({ medicineName: "", dosage: "", time: "", reminderType: "ring" });
+    toast({
+      title: "নতুন রিমাইন্ডার",
+      description: "রিমাইন্ডার সফলভাবে যোগ হয়েছে",
+    });
+  };
+
   const showMedicineNotification = (reminder: any) => {
     if ("Notification" in window && Notification.permission === "granted") {
       const notification = new Notification("ঔষধ খাওয়ার সময় হয়েছে", {
@@ -170,10 +195,17 @@ const Reminders = () => {
       },
     });
   };
-  
-  const today = activeReminders.filter(r => r.running);
-  const upcoming = activeReminders.filter(r => r.upcoming);
-  
+
+  const today = activeReminders.filter(r => r.running).map(r => ({
+    ...r, reminderType: r.reminderType || "ring"
+  }));
+  const upcoming = activeReminders.filter(r => r.upcoming).map(r => ({
+    ...r, reminderType: r.reminderType || "ring"
+  }));
+  const completed = completedReminders.map(r => ({
+    ...r, reminderType: r.reminderType || "ring"
+  }));
+
   return (
     <Layout>
       <div className="page-container">
@@ -193,12 +225,43 @@ const Reminders = () => {
                 <span className="bangla">নোটিফিকেশন সক্রিয় করুন</span>
               </Button>
             )}
-            <Button className="gap-2 whitespace-nowrap">
+            <Button className="gap-2 whitespace-nowrap" onClick={() => setShowForm(true)} type="button">
               <Plus className="h-4 w-4" />
               <span className="bangla">নতুন রিমাইন্ডার</span>
             </Button>
           </div>
         </div>
+
+        {showForm && (
+          <form className="mb-8 bg-card p-4 rounded-lg shadow space-y-4" onSubmit={handleAddReminder}>
+            <div className="flex flex-col gap-3 md:flex-row md:gap-6">
+              <div className="flex-1">
+                <label className="bangla block mb-1">ঔষধের নাম</label>
+                <input required type="text" name="medicineName" className="input input-bordered w-full px-3 py-2 rounded-md border" value={form.medicineName} onChange={handleFormChange} />
+              </div>
+              <div className="flex-1">
+                <label className="bangla block mb-1">ডোজ</label>
+                <input required type="text" name="dosage" className="input input-bordered w-full px-3 py-2 rounded-md border" value={form.dosage} onChange={handleFormChange} />
+              </div>
+              <div className="flex-1">
+                <label className="bangla block mb-1">সময়</label>
+                <input required type="text" name="time" className="input input-bordered w-full px-3 py-2 rounded-md border" value={form.time} onChange={handleFormChange} />
+              </div>
+              <div className="flex-1">
+                <label className="bangla block mb-1">নোটিফিকেশন টাইপ</label>
+                <select name="reminderType" className="input input-bordered w-full px-3 py-2 rounded-md border" value={form.reminderType} onChange={handleFormChange}>
+                  <option value="ring">রিং</option>
+                  <option value="silent">নীরব</option>
+                  <option value="vibration">ভাইব্রেশন</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button type="submit" className="bangla flex-1">সংরক্ষণ করুন</Button>
+              <Button type="button" variant="outline" className="bangla flex-1" onClick={() => setShowForm(false)}>বাতিল</Button>
+            </div>
+          </form>
+        )}
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card className="p-4 text-center flex flex-col items-center justify-center aspect-video">
@@ -265,7 +328,7 @@ const Reminders = () => {
               <div className="text-center py-8">
                 <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground bangla">কোন সক্রিয় রিমাইন্ডার নেই</p>
-                <Button className="mt-4 gap-2">
+                <Button className="mt-4 gap-2" onClick={() => setShowForm(true)} type="button">
                   <Plus className="h-4 w-4" />
                   <span className="bangla">নতুন রিমাইন্ডার যোগ করুন</span>
                 </Button>
@@ -274,9 +337,9 @@ const Reminders = () => {
           </TabsContent>
           
           <TabsContent value="completed" className="space-y-4 mt-0">
-            {completedReminders.length > 0 ? (
+            {completed.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {completedReminders.map((reminder) => (
+                {completed.map((reminder) => (
                   <ReminderCard key={reminder.id} {...reminder} />
                 ))}
               </div>

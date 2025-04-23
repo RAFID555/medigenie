@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Bell, Check, ShoppingBag, AlertCircle } from "lucide-react";
+import { Bell, Check, ShoppingBag, AlertCircle, BellOff, BellRing, Vibrate } from "lucide-react";
 
 interface ReminderCardProps {
   id: string;
@@ -14,6 +13,7 @@ interface ReminderCardProps {
   running?: boolean;
   upcoming?: boolean;
   remainingDays?: number;
+  reminderType?: "ring" | "silent" | "vibration";
 }
 
 export const ReminderCard = ({
@@ -25,6 +25,7 @@ export const ReminderCard = ({
   running = false,
   upcoming = false,
   remainingDays = 0,
+  reminderType = "ring",
 }: ReminderCardProps) => {
   const [isCompleted, setIsCompleted] = useState(completed);
   
@@ -38,6 +39,20 @@ export const ReminderCard = ({
   const handleComplete = () => {
     setIsCompleted(true);
   };
+
+  // Icon and label for reminder type
+  let typeIcon = <Bell className="h-4 w-4 text-blue-400" />;
+  let typeLabel = "রিং";
+  if (reminderType === "silent") {
+    typeIcon = <BellOff className="h-4 w-4 text-gray-400" />;
+    typeLabel = "নীরব";
+  } else if (reminderType === "vibration") {
+    typeIcon = <Vibrate className="h-4 w-4 text-violet-500" />;
+    typeLabel = "ভাইব্রেশন";
+  } else if (reminderType === "ring") {
+    typeIcon = <BellRing className="h-4 w-4 text-yellow-500" />;
+    typeLabel = "রিং";
+  }
 
   return (
     <Card className={cn(
@@ -60,10 +75,13 @@ export const ReminderCard = ({
                 <Bell className="h-5 w-5 text-gray-500" />
               </div>
             )}
-            
             <div>
               <h3 className="font-medium bangla">{medicineName}</h3>
               <p className="text-sm text-muted-foreground bangla">{dosage}</p>
+              <div className="flex items-center gap-1 mt-1">
+                {typeIcon}
+                <span className="text-xs text-muted-foreground bangla">{typeLabel}</span>
+              </div>
             </div>
           </div>
           
