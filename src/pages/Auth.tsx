@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
-import { User, LogIn, LogInWith } from "lucide-react";
+import { User, LogIn, Github } from "lucide-react";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -189,7 +190,7 @@ const AuthPage = () => {
                   <span className="bangla">লোড হচ্ছে...</span>
                 ) : (
                   <>
-                    <LogInWith className="h-4 w-4" />
+                    <Github className="h-4 w-4" />
                     <span className="bangla">গুগল দিয়ে লগইন করুন</span>
                   </>
                 )}
