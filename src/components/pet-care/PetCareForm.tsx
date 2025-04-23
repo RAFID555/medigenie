@@ -1,268 +1,168 @@
 
-import React, { memo } from "react";
-import { useForm } from "react-hook-form";
+import React, { useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { X, Check } from "lucide-react";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Label } from "@/components/ui/label";
 
-export type FormType = 'checkup' | 'vaccination' | 'medication';
-
-// Define the form schema based on the form type
-const createFormSchema = (formType: FormType) => {
-  const baseSchema = {
-    petName: z.string().min(1, "Pet name is required"),
-    date: z.string().min(1, "Date is required"),
-  };
-
-  if (formType === 'checkup') {
-    return z.object({
-      ...baseSchema,
-      veterinarian: z.string().optional(),
-      notes: z.string().optional(),
-    });
-  } else if (formType === 'vaccination') {
-    return z.object({
-      ...baseSchema,
-      vaccineName: z.string().min(1, "Vaccine name is required"),
-      nextDueDate: z.string().optional(),
-    });
-  } else {
-    return z.object({
-      ...baseSchema,
-      medicationName: z.string().min(1, "Medication name is required"),
-      dosage: z.string().optional(),
-      frequency: z.string().optional(),
-      startDate: z.string().optional(),
-      endDate: z.string().optional(),
-      notes: z.string().optional(),
-    });
-  }
-};
-
-interface PetCareFormProps {
+type FormType = "checkup" | "vaccination" | "medication";
+type PetCareFormProps = {
   formType: FormType;
   onSubmit: (data: any) => void;
   onCancel: () => void;
-  initialData?: any;
-}
+};
 
-const PetCareForm = memo(({ formType, onSubmit, onCancel, initialData = {} }: PetCareFormProps) => {
-  const formSchema = createFormSchema(formType);
-  type FormValues = z.infer<typeof formSchema>;
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: initialData,
+const PetCareForm: React.FC<PetCareFormProps> = ({ formType, onSubmit, onCancel }) => {
+  const [form, setForm] = React.useState<any>({
+    petName: "",
+    date: "",
+    veterinarian: "",
+    notes: "",
+    vaccineName: "",
+    nextDueDate: "",
+    medicationName: "",
+    dosage: "",
+    frequency: "",
+    startDate: "",
+    endDate: ""
   });
 
-  const submitForm = (data: FormValues) => {
-    onSubmit(data);
-  };
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
+      setForm(prev => ({ ...prev, [name]: value }));
+    },
+    []
+  );
+
+  const resetFields = useCallback(() => {
+    setForm({
+      petName: "",
+      date: "",
+      veterinarian: "",
+      notes: "",
+      vaccineName: "",
+      nextDueDate: "",
+      medicationName: "",
+      dosage: "",
+      frequency: "",
+      startDate: "",
+      endDate: ""
+    });
+  }, []);
+
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      // Extract only needed fields according to formType
+      let data: any = {};
+      if (formType === "checkup") {
+        data = {
+          petName: form.petName,
+          date: form.date,
+          veterinarian: form.veterinarian,
+          notes: form.notes
+        };
+      }
+      if (formType === "vaccination") {
+        data = {
+          petName: form.petName,
+          vaccineName: form.vaccineName,
+          date: form.date,
+          nextDueDate: form.nextDueDate
+        };
+      }
+      if (formType === "medication") {
+        data = {
+          petName: form.petName,
+          medicationName: form.medicationName,
+          dosage: form.dosage,
+          frequency: form.frequency,
+          startDate: form.startDate,
+          endDate: form.endDate,
+          notes: form.notes
+        };
+      }
+      onSubmit(data);
+      resetFields();
+    },
+    [form, formType, onSubmit, resetFields]
+  );
 
   return (
-    <div className="p-4 border rounded-md bg-card shadow-sm mt-4">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(submitForm)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="petName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="bangla">পোষা প্রাণীর নাম</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="মিমি" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <form className="space-y-4 bg-background/90 p-4 rounded-md shadow" onSubmit={handleSubmit}>
+      <div>
+        <Label htmlFor="petName" className="bangla">পোষা প্রাণীর নাম</Label>
+        <Input required name="petName" id="petName" value={form.petName} onChange={handleChange} />
+      </div>
 
-          <FormField
-            control={form.control}
-            name="date"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="bangla">তারিখ</FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {formType === 'checkup' && (
-            <>
-              <FormField
-                control={form.control}
-                name="veterinarian"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="bangla">ভেটেরিনারিয়ান</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="ডাঃ আহমেদ" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="bangla">নোট</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} placeholder="পরীক্ষা নোট" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </>
-          )}
-
-          {formType === 'vaccination' && (
-            <>
-              <FormField
-                control={form.control}
-                name="vaccineName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="bangla">টিকার নাম</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="রেবিজ" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="nextDueDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="bangla">পরবর্তী তারিখ</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </>
-          )}
-
-          {formType === 'medication' && (
-            <>
-              <FormField
-                control={form.control}
-                name="medicationName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="bangla">ওষুধের নাম</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="দেখুন" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="dosage"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="bangla">ডোজ</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="১ টেবলেট" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="frequency"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="bangla">ফ্রিকোয়েন্সি</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="দিনে দুইবার" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="startDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="bangla">শুরুর তারিখ</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="endDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="bangla">শেষের তারিখ</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <FormField
-                control={form.control}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="bangla">নোট</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} placeholder="বিশেষ নির্দেশনা" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </>
-          )}
-
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" type="button" onClick={onCancel} className="w-24">
-              <X className="mr-2 h-4 w-4" /> <span className="bangla">বাতিল</span>
-            </Button>
-            <Button type="submit" className="w-24">
-              <Check className="mr-2 h-4 w-4" /> <span className="bangla">সংরক্ষণ</span>
-            </Button>
+      {formType === "checkup" && (
+        <>
+          <div>
+            <Label htmlFor="date" className="bangla">তারিখ</Label>
+            <Input type="date" required name="date" id="date" value={form.date} onChange={handleChange} />
           </div>
-        </form>
-      </Form>
-    </div>
+          <div>
+            <Label htmlFor="veterinarian" className="bangla">ভেটেরিনারিয়ান</Label>
+            <Input name="veterinarian" id="veterinarian" value={form.veterinarian} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="notes" className="bangla">নোট</Label>
+            <Input name="notes" id="notes" value={form.notes} onChange={handleChange} />
+          </div>
+        </>
+      )}
+
+      {formType === "vaccination" && (
+        <>
+          <div>
+            <Label htmlFor="vaccineName" className="bangla">টিকার নাম</Label>
+            <Input required name="vaccineName" id="vaccineName" value={form.vaccineName} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="date" className="bangla">টিকা তারিখ</Label>
+            <Input type="date" required name="date" id="date" value={form.date} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="nextDueDate" className="bangla">পরবর্তী ডিউ তারিখ</Label>
+            <Input type="date" name="nextDueDate" id="nextDueDate" value={form.nextDueDate} onChange={handleChange} />
+          </div>
+        </>
+      )}
+
+      {formType === "medication" && (
+        <>
+          <div>
+            <Label htmlFor="medicationName" className="bangla">ওষুধের নাম</Label>
+            <Input required name="medicationName" id="medicationName" value={form.medicationName} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="dosage" className="bangla">খাবার মাত্রা (Dosage)</Label>
+            <Input name="dosage" id="dosage" value={form.dosage} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="frequency" className="bangla">ফ্রিকোয়েন্সি</Label>
+            <Input name="frequency" id="frequency" value={form.frequency} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="startDate" className="bangla">শুরুর তারিখ</Label>
+            <Input type="date" name="startDate" id="startDate" value={form.startDate} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="endDate" className="bangla">শেষের তারিখ</Label>
+            <Input type="date" name="endDate" id="endDate" value={form.endDate} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="notes" className="bangla">নোট</Label>
+            <Input name="notes" id="notes" value={form.notes} onChange={handleChange} />
+          </div>
+        </>
+      )}
+
+      <div className="flex gap-3 justify-between mt-4">
+        <Button type="submit" className="w-full bangla">সংরক্ষণ করুন</Button>
+        <Button type="button" variant="outline" className="w-full bangla" onClick={onCancel}>বাতিল</Button>
+      </div>
+    </form>
   );
-});
-
-PetCareForm.displayName = "PetCareForm";
-
+};
 export default PetCareForm;

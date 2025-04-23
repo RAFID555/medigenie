@@ -82,7 +82,6 @@ const PetCheckups = memo(({ checkups, setCheckups }: PetCheckupsProps) => {
             কোন চেকআপ যোগ করা হয়নি
           </div>
         )}
-        
         {showCheckupForm ? (
           <PetCareForm 
             formType="checkup"
@@ -100,5 +99,4 @@ const PetCheckups = memo(({ checkups, setCheckups }: PetCheckupsProps) => {
 });
 
 PetCheckups.displayName = "PetCheckups";
-
 export default PetCheckups;
