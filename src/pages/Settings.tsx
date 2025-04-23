@@ -18,7 +18,7 @@ import {
   Bell,
   Clock,
   Save,
-  Settings as SettingsIcon,
+  SettingsIcon,
   Edit
 } from "lucide-react";
 
@@ -108,7 +108,7 @@ const Settings = () => {
               disabled={profileMode !== "edit"}
             />
           </div>
-          <h2 className="text-lg font-semibold mb-4">
+          <h2 className="text-lg font-semibold mb-4 bangla">
             {getLabel("ব্যক্তিগত তথ্য", "Personal Information")}
           </h2>
 
@@ -214,7 +214,7 @@ const Settings = () => {
 
         <div className="space-y-6">
           <Card className="p-6">
-            <h2 className="text-lg font-semibold mb-4">
+            <h2 className="text-lg font-semibold mb-4 bangla">
               {getLabel("ভাষা এবং রিজিওনাল", "Language and Regional")}
             </h2>
 
@@ -271,7 +271,7 @@ const Settings = () => {
           </Card>
 
           <Card className="p-6">
-            <h2 className="text-lg font-semibold mb-4">
+            <h2 className="text-lg font-semibold mb-4 bangla">
               {getLabel("নোটিফিকেশন এবং রিমাইন্ডার", "Notifications and Reminders")}
             </h2>
 

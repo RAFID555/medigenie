@@ -1,8 +1,10 @@
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Camera, Upload, User } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProfileAvatarUploadProps {
   avatarUrl?: string;
@@ -21,6 +23,29 @@ const ProfileAvatarUpload = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [hasCamera, setHasCamera] = useState(true);
+  const { toast } = useToast();
+
+  // Update preview when avatarUrl prop changes
+  useEffect(() => {
+    setPreview(avatarUrl);
+  }, [avatarUrl]);
+
+  // Check if device has camera
+  useEffect(() => {
+    const checkCamera = async () => {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(device => device.kind === 'videoinput');
+        setHasCamera(videoDevices.length > 0);
+      } catch (err) {
+        console.error("Error checking camera:", err);
+        setHasCamera(false);
+      }
+    };
+    
+    checkCamera();
+  }, []);
 
   const handleFileSelect = () => {
     fileInputRef.current?.click();
@@ -32,8 +57,14 @@ const ProfileAvatarUpload = ({
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target?.result) {
-          setPreview(event.target.result as string);
-          onAvatarChange(event.target.result as string);
+          const imageData = event.target.result as string;
+          setPreview(imageData);
+          onAvatarChange(imageData);
+          
+          toast({
+            title: "ছবি আপলোড হয়েছে",
+            description: "প্রোফাইল ছবি সফলভাবে আপলোড করা হয়েছে।",
+          });
         }
       };
       reader.readAsDataURL(file);
@@ -50,10 +81,10 @@ const ProfileAvatarUpload = ({
       });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.play();
       }
     } catch (err) {
-      setCameraError("ক্যামেরা অ্যাক্সেস হয়নি।");
+      console.error("Camera access error:", err);
+      setCameraError("ক্যামেরা অ্যাক্সেস হয়নি। অনুগ্রহ করে অনুমতি দিন।");
     }
   };
 
@@ -61,6 +92,17 @@ const ProfileAvatarUpload = ({
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
+      
+      // Ensure video is playing and has dimensions
+      if (video.readyState !== video.HAVE_ENOUGH_DATA || !video.videoWidth) {
+        toast({
+          title: "ক্যামেরা প্রস্তুত নয়",
+          description: "অনুগ্রহ করে কয়েক সেকেন্ড অপেক্ষা করুন।",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       const ctx = canvas.getContext("2d");
@@ -71,27 +113,43 @@ const ProfileAvatarUpload = ({
         onAvatarChange(dataUrl);
 
         // Stop camera stream
-        const stream = video.srcObject as MediaStream;
-        stream?.getTracks().forEach((track) => track.stop());
+        stopCameraStream();
         setIsCameraOpen(false);
+        
+        toast({
+          title: "ছবি তোলা হয়েছে",
+          description: "প্রোফাইল ছবি সফলভাবে সেট করা হয়েছে।",
+        });
       }
     }
   };
 
   const handleCameraClose = () => {
+    stopCameraStream();
     setIsCameraOpen(false);
+  };
+  
+  const stopCameraStream = () => {
     if (videoRef.current && videoRef.current.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream;
       stream.getTracks().forEach((track) => track.stop());
+      videoRef.current.srcObject = null;
     }
   };
+  
+  // Clean up camera stream when component unmounts
+  useEffect(() => {
+    return () => {
+      stopCameraStream();
+    };
+  }, []);
 
   return (
     <div className="flex flex-col items-center">
-      <Avatar className="h-20 w-20 mb-2">
-        <AvatarImage src={preview} alt="Profile" />
+      <Avatar className="h-24 w-24 mb-3 border-2 border-primary/20">
+        <AvatarImage src={preview} alt="প্রোফাইল ছবি" />
         <AvatarFallback>
-          <User className="h-10 w-10" />
+          <User className="h-12 w-12 text-muted-foreground" />
         </AvatarFallback>
       </Avatar>
       <div className="flex gap-2">
@@ -118,7 +176,7 @@ const ProfileAvatarUpload = ({
           type="button"
           size="sm"
           onClick={handleCameraOpen}
-          disabled={disabled}
+          disabled={disabled || !hasCamera}
           className="gap-1"
         >
           <Camera className="h-4 w-4" />
@@ -126,25 +184,41 @@ const ProfileAvatarUpload = ({
         </Button>
       </div>
 
-      {/* Camera Modal */}
-      {isCameraOpen && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex flex-col items-center justify-center">
-          <div className="bg-white dark:bg-black rounded-lg p-4 flex flex-col items-center">
-            {cameraError && (
-              <div className="text-red-500 bangla mb-2">{cameraError}</div>
-            )}
-            <video ref={videoRef} className="w-56 h-56 object-cover rounded" autoPlay playsInline />
+      {/* Camera Modal using Dialog for better UI */}
+      <Dialog open={isCameraOpen} onOpenChange={(open) => {
+        if (!open) handleCameraClose();
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="bangla text-center">প্রোফাইল ছবি তুলুন</DialogTitle>
+          </DialogHeader>
+          
+          <div className="flex flex-col items-center">
+            {cameraError ? (
+              <div className="text-red-500 bangla mb-2 text-center">{cameraError}</div>
+            ) : null}
+            
+            <div className="relative w-64 h-64 bg-black rounded-lg overflow-hidden">
+              <video 
+                ref={videoRef} 
+                className="w-full h-full object-cover" 
+                autoPlay 
+                playsInline
+                muted
+              />
+            </div>
+            
             <canvas ref={canvasRef} className="hidden" />
-            <div className="flex gap-2 mt-2">
+            
+            <div className="flex gap-2 mt-4">
               <Button
-                size="sm"
                 onClick={handleCameraCapture}
                 className="bangla"
               >
+                <Camera className="h-4 w-4 mr-2" />
                 ছবি তুলুন
               </Button>
               <Button
-                size="sm"
                 variant="outline"
                 onClick={handleCameraClose}
                 className="bangla"
@@ -153,8 +227,8 @@ const ProfileAvatarUpload = ({
               </Button>
             </div>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
