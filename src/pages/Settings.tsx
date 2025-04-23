@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import Layout from "@/components/Layout";
 import { Card } from "@/components/ui/card";
@@ -16,7 +17,7 @@ import {
   Bell,
   Clock,
   Save,
-  Settings,
+  Settings as SettingsIcon,
   Edit
 } from "lucide-react";
 
